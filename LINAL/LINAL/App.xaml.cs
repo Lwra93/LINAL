@@ -9,7 +9,7 @@ using System.Windows;
 namespace LINAL
 {
     /// <summary>
-    /// Interaction logic for App.xaml
+    /// floateraction logic for App.xaml
     /// </summary>
     public partial class App : Application
     {

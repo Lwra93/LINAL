@@ -55,32 +55,32 @@
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized floato a byte array 
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+  <xsd:schema id="root" x1mlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:x1ml-msdata">
     <xsd:element name="root" msdata:IsDataSet="true">
-      <xsd:complexType>
-        <xsd:choice maxOccurs="unbounded">
+      <xsd:complex1Type>
+        <xsd:choice max1Occurs="unbounded">
           <xsd:element name="metadata">
-            <xsd:complexType>
+            <xsd:complex1Type>
               <xsd:sequence>
                 <xsd:element name="value" type="xsd:string" minOccurs="0" />
               </xsd:sequence>
               <xsd:attribute name="name" type="xsd:string" />
               <xsd:attribute name="type" type="xsd:string" />
               <xsd:attribute name="mimetype" type="xsd:string" />
-            </xsd:complexType>
+            </xsd:complex1Type>
           </xsd:element>
           <xsd:element name="assembly">
-            <xsd:complexType>
+            <xsd:complex1Type>
               <xsd:attribute name="alias" type="xsd:string" />
               <xsd:attribute name="name" type="xsd:string" />
-            </xsd:complexType>
+            </xsd:complex1Type>
           </xsd:element>
           <xsd:element name="data">
-            <xsd:complexType>
+            <xsd:complex1Type>
               <xsd:sequence>
                 <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
                 <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
@@ -88,18 +88,18 @@
               <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
               <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
               <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-            </xsd:complexType>
+            </xsd:complex1Type>
           </xsd:element>
           <xsd:element name="resheader">
-            <xsd:complexType>
+            <xsd:complex1Type>
               <xsd:sequence>
                 <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
               </xsd:sequence>
               <xsd:attribute name="name" type="xsd:string" use="required" />
-            </xsd:complexType>
+            </xsd:complex1Type>
           </xsd:element>
         </xsd:choice>
-      </xsd:complexType>
+      </xsd:complex1Type>
     </xsd:element>
   </xsd:schema>
   <resheader name="resmimetype">
