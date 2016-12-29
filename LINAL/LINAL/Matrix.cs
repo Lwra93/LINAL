@@ -113,6 +113,16 @@ namespace LINAL
             }
         }
 
+        public void AddHelpRow()
+        {
+            
+            SetSizeWithData(_rows+1,_columns);
+
+            for (int i = 0; i < _columns; i++)
+                _data[_rows, i] = 1;
+
+        }
+
         public void Print()
         {
             for (int row = 0; row < _data.GetLength(0); row++)

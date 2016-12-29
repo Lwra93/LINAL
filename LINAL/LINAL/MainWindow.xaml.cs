@@ -47,16 +47,15 @@ namespace LINAL
 
             MatrixMath m = new MatrixMath();
 
-            Console.WriteLine("Matrix1:");
-            m1.Print();
+            Console.WriteLine("Matrix 2: ");
+            m2.Print();
+            
 
-            Console.WriteLine("Matrix2:");
+            Console.WriteLine("Scaled");
+            m2.AddHelpRow();
             m2.Print();
 
-            Console.WriteLine("Multiplied:");
-            m.Multiply(m1, m2).Print();
 
-            Console.Read();
 
 
         }
