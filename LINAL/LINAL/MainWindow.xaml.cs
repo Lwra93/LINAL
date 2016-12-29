@@ -23,36 +23,44 @@ namespace LINAL
         public MainWindow()
         {
             InitializeComponent();
-            Draw();
+            Calc();
         }
 
-        public void Draw()
+        public void Calc()
         {
             
-            Vector v1 = new Vector(200, 100, 100, 100);
-            Vector v2 = VectorFactory.Enlarge(v1, 0.1f);
+            Matrix m1 = new Matrix(2, 2);
+            m1.Add(0,0,1.2f);
+            m1.Add(0,1,0f);
+            m1.Add(1,0,0f);
+            m1.Add(1,1,1.1f);
 
-            //DrawVector(v1);
-           DrawVector(v2);
+            Matrix m2 = new Matrix(2,4);
+            m2.Add(0,0,3f);
+            m2.Add(0,1,4f);
+            m2.Add(0,2,6f);
+            m2.Add(0,3,1f);
+            m2.Add(1,0,2f);
+            m2.Add(1,1,1f);
+            m2.Add(1,2,7f);
+            m2.Add(1,3,5f);
+
+            MatrixMath m = new MatrixMath();
+
+            Console.WriteLine("Matrix1:");
+            m1.Print();
+
+            Console.WriteLine("Matrix2:");
+            m2.Print();
+
+            Console.WriteLine("Multiplied:");
+            m.Multiply(m1, m2).Print();
+
+            Console.Read();
+
 
         }
 
-        public void DrawVector(Vector v)
-        {
-
-            Line myLine = new Line();
-            myLine.Stroke = System.Windows.Media.Brushes.Red;
-            myLine.X1 = v.GetX1();
-            myLine.X2 = v.GetX2();
-            myLine.Y1 = v.GetY1();
-            myLine.Y2 = v.GetY2();
-            myLine.HorizontalAlignment = HorizontalAlignment.Left;
-            myLine.VerticalAlignment = VerticalAlignment.Center;
-            myLine.StrokeThickness = 2;
-            MyCanvas.Children.Add(myLine);
-            
-
-        }
 
     }
 }

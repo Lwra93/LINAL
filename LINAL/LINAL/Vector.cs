@@ -6,42 +6,94 @@ using System.Threading.Tasks;
 
 namespace LINAL
 {
-    public class Vector
+    class Vector
     {
 
-        private readonly float _x1;
-        private readonly float _x2;
-        private readonly float _y1;
-        private readonly float _y2;
+        private Point[] points = new Point[2];
 
-        public Vector(float x1, float y1, float x2, float y2)
+        public Vector()
         {
-
-            this._x1 = x1;
-            this._y1 = y1;
-            this._x2 = x2;
-            this._y2 = y2;
-
+            
         }
 
-        public float GetX1()
+        public Vector(Point p1, Point p2)
         {
-            return _x1;
+            points[0] = p1;
+            points[1] = p2;
         }
 
-        public float GetY1()
+        public void SetPoint(int index, Point point)
         {
-            return _y1;
+            if (index >= 0 && index < points.Length)
+                points[index] = point;
         }
 
-        public float GetX2()
+        public void AddPoint(Point point)
         {
-            return _x2;
+            for (int i = 0; i < points.Length; i++)
+            {
+                if (points[i] == null)
+                    points[i] = point;
+            }
         }
 
-        public float GetY2()
+        public void RemovePoint(int index)
         {
-            return _y2;
+            if (index >= 0 && index < points.Length)
+                points[index] = null;
+        }
+        public void RemovePoint(Point point)
+        {
+            for (int i = 0; i < points.Length; i++)
+            {
+                if (points[i] == point)
+                    points[i] = null;
+            }
+        }
+
+        public void RemoveAll()
+        {
+            for (int i = 0; i < points.Length; i++)
+                points[i] = null;
+        }
+
+        public Point GetPoint(int index)
+        {
+            if (index >= 0 && index < points.Length)
+                return points[index];
+
+            return null;
+        }
+
+        public bool IsProperVector()
+        {
+            int realPoints = 0;
+
+            for (int i = 0; i < points.Length; i++)
+            {
+                if (points[i] != null) realPoints++;
+            }
+
+            return realPoints == points.Length;
+        }
+
+        public void Enlarge(float factor)
+        {
+
+            if (!IsProperVector())
+                return;
+
+            Point p1 = points[0];
+            Point p2 = points[1];
+
+            float deltaX = p2.GetX() - p1.GetX();
+            float deltaY = p2.GetY() - p1.GetY();
+            float deltaZ = p2.GetZ() - p1.GetZ();
+
+            p2.SetX(deltaX*factor);
+            p2.SetY(deltaY*factor);
+            p2.SetZ(deltaZ*factor);
+
         }
 
     }
