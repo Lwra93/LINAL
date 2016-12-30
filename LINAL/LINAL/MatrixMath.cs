@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Navigation;
 
 namespace LINAL
 {
@@ -47,7 +48,28 @@ namespace LINAL
             return result;
         }
 
-        public Matrix Scale(Matrix m, float xScale, float yScale, float zScale)
+        public Matrix Scale(Matrix m, Matrix scaling)
+        {
+            return Multiply(scaling, m);
+        }
+
+        public Matrix Translate(Matrix m, Matrix translate)
+        {
+            return Multiply(translate, m);
+        }
+
+        public Matrix GetScaleAndTranslate(Matrix scaling, Matrix translate)
+        {
+
+            for (int i = 0; i < scaling.GetRows(); i++)
+                translate.Add(i,i,scaling.Get(i,i));
+
+            return translate;
+
+
+        }
+
+        public Matrix GetScalingMatrix(Matrix m, float xScale, float yScale, float zScale = 0)
         {
             
             Matrix scalingMatrix = new Matrix(m.GetRows(), m.GetRows());
@@ -57,37 +79,43 @@ namespace LINAL
             if(zScale > 0)
                 scalingMatrix.Add(2, 2, zScale);
 
-            return Multiply(scalingMatrix, m);
+            return scalingMatrix;
 
         }
 
-        public Matrix Translate(Matrix m, float x, float y, float z)
+
+
+
+        public Matrix GetTranslationMatrix(float x, float y, float z = 0)
         {
+            Matrix translationMatrix = (z <= 0 ? new Matrix(3, 3) : new Matrix(4, 4));
+            translationMatrix.MakeIdentityMatrix();
+            translationMatrix.Add(0, 2, x);
+            translationMatrix.Add(1, 2, y);
 
             if (z > 0)
-                return Translate3D(m, x, y, z);
-            else
-                return Translate2D(m, x, y);
+                translationMatrix.Add(2, 2, z);
+
+            return translationMatrix;
 
         }
 
-        public Matrix Translate2D(Matrix m, float x, float y)
+        public Matrix GetRotationOffspring(Matrix m, double alpha)
         {
             
-            Matrix translationMatrix = new Matrix(3,3);
-            translationMatrix.MakeIdentityMatrix();
-            translationMatrix.Add(0,2,x);
-            translationMatrix.Add(1,2,y);
+            Matrix rotationMatrix = new Matrix(m.GetRows(), m.GetRows());
 
-            m.SetSizeWithData(m.GetRows()+1, m.GetColumns());
+            float cos = (float) Math.Cos(alpha * (Math.PI / 180.0));
+            float sin = (float)Math.Sin(alpha * (Math.PI / 180.0));
 
-            return null;
+            rotationMatrix.Add(0,0, cos);
+            rotationMatrix.Add(0,1,-sin);
+            rotationMatrix.Add(1,0,sin);
+            rotationMatrix.Add(1,1, cos);
 
-        }
+            return rotationMatrix;
+            
 
-        public Matrix Translate3D(Matrix m, float x, float y, float z)
-        {
-            return null;
         }
 
     }

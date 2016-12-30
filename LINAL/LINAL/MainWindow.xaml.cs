@@ -29,31 +29,23 @@ namespace LINAL
         public void Calc()
         {
             
-            Matrix m1 = new Matrix(2, 2);
-            m1.Add(0,0,1.2f);
-            m1.Add(0,1,0f);
-            m1.Add(1,0,0f);
-            m1.Add(1,1,1.1f);
-
-            Matrix m2 = new Matrix(2,4);
-            m2.Add(0,0,3f);
-            m2.Add(0,1,4f);
-            m2.Add(0,2,6f);
-            m2.Add(0,3,1f);
-            m2.Add(1,0,2f);
-            m2.Add(1,1,1f);
-            m2.Add(1,2,7f);
-            m2.Add(1,3,5f);
+            Matrix m1 = new Matrix(2,3);
+            m1.Add(0,0,4);
+            m1.Add(0,1,3);
+            m1.Add(0,2,5);
+            m1.Add(1,0,1);
+            m1.Add(1,1,3);
+            m1.Add(1,2,3);
 
             MatrixMath m = new MatrixMath();
 
             Console.WriteLine("Matrix 2: ");
-            m2.Print();
-            
+            Matrix rotate = m.GetRotationOffspring(m1, 10);
+            Matrix x = m.Multiply(rotate, m1);
 
-            Console.WriteLine("Scaled");
-            m2.AddHelpRow();
-            m2.Print();
+            x.Print();
+
+
 
 
 

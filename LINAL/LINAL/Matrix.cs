@@ -83,6 +83,8 @@ namespace LINAL
 
         public void SetSizeWithoutData(int rows, int columns)
         {
+            _rows = rows;
+            _columns = columns;
             _data = new float[rows,columns];
         }
 
@@ -119,7 +121,7 @@ namespace LINAL
             SetSizeWithData(_rows+1,_columns);
 
             for (int i = 0; i < _columns; i++)
-                _data[_rows, i] = 1;
+                _data[_rows-1, i] = 1;
 
         }
 
