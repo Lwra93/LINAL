@@ -41,6 +41,16 @@ namespace LINAL
             this._columns = columns;
         }
 
+        public float[,] GetData()
+        {
+            return _data;
+        }
+
+        public void SetData(float[,] data)
+        {
+            _data = data;
+        }
+
         public float Get(int row, int column)
         {
             if (row >= 0 && row < _data.GetLength(0) && column >= 0 && column < _data.GetLength(1))
@@ -115,6 +125,69 @@ namespace LINAL
             }
         }
 
+        public void Translate(Point translateOver)
+        {
+
+            bool addedHelpRow = false;
+            Matrix translation = MatrixFactory.GetTranslationMatrix(translateOver);
+
+            if (translation.GetColumns() != GetRows())
+            {
+                AddHelpRow();
+                addedHelpRow = true;
+            }
+                
+
+            Matrix result = MatrixFactory.Multiply(translation, this);
+
+            if(result != null)
+                _data = result.GetData();
+
+            if(addedHelpRow)
+                RemoveHelpRow();
+            
+
+        }
+
+        public void Scale(Point p)
+        {
+
+            Matrix scaling = MatrixFactory.GetScalingMatrix(this, p);
+            Matrix result = MatrixFactory.Multiply(scaling, this);
+
+            if (result != null)
+                _data = result.GetData();
+
+        }
+
+        public void Rotate2D(double angle, Point p = null)
+        {
+
+            //Rotate around offspring
+            if (p == null)
+            {
+                Matrix rotation = MatrixFactory.Rotate2D(angle);
+                Matrix result = MatrixFactory.Multiply(rotation, this);
+                if (result != null)
+                    _data = result.GetData();
+            }
+            else
+            {
+                
+                Point inverse = new Point(-p.GetX(), -p.GetY(), -p.GetZ());
+                Translate(inverse);
+                Matrix rotation = MatrixFactory.Rotate2D(angle);
+                Matrix result = MatrixFactory.Multiply(rotation, this);
+
+                if (result != null)
+                    _data = result.GetData();
+
+                Translate(p);
+
+            }
+
+        }
+
         public void AddHelpRow()
         {
             
@@ -123,6 +196,11 @@ namespace LINAL
             for (int i = 0; i < _columns; i++)
                 _data[_rows-1, i] = 1;
 
+        }
+
+        public void RemoveHelpRow()
+        {
+            SetSizeWithData(_rows - 1, _columns);
         }
 
         public void Print()

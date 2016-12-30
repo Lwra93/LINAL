@@ -56,7 +56,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Matrix.cs" />
-    <Compile Include="MatrixMath.cs" />
+    <Compile Include="MatrixFactory.cs" />
     <Compile Include="Point.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>

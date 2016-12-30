@@ -37,13 +37,11 @@ namespace LINAL
             m1.Add(1,1,3);
             m1.Add(1,2,3);
 
-            MatrixMath m = new MatrixMath();
+            m1.Print();
+            Point p = new Point(3,5);
+            m1.Rotate2D(10, p);
 
-            Console.WriteLine("Matrix 2: ");
-            Matrix rotate = m.GetRotationOffspring(m1, 10);
-            Matrix x = m.Multiply(rotate, m1);
-
-            x.Print();
+            m1.Print();
 
 
 
