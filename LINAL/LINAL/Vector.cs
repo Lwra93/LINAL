@@ -9,90 +9,54 @@ namespace LINAL
     class Vector
     {
 
-        private Point[] points = new Point[2];
+        private float x, y, z;
 
-        public Vector()
+        public Vector(float x, float y, float z)
         {
-            
+            this.x = x;
+            this.y = y;
+            this.z = z;
         }
 
         public Vector(Point p1, Point p2)
         {
-            points[0] = p1;
-            points[1] = p2;
+            this.x = p2.GetX() - p1.GetX();
+            this.y = p2.GetY() - p1.GetY();
+            this.z = p2.GetZ() - p1.GetZ();
         }
 
-        public void SetPoint(int index, Point point)
+        public float GetX()
         {
-            if (index >= 0 && index < points.Length)
-                points[index] = point;
+            return x;
         }
 
-        public void AddPoint(Point point)
+        public float GetY()
         {
-            for (int i = 0; i < points.Length; i++)
-            {
-                if (points[i] == null)
-                    points[i] = point;
-            }
+            return y;
         }
 
-        public void RemovePoint(int index)
+        public float GetZ()
         {
-            if (index >= 0 && index < points.Length)
-                points[index] = null;
-        }
-        public void RemovePoint(Point point)
-        {
-            for (int i = 0; i < points.Length; i++)
-            {
-                if (points[i] == point)
-                    points[i] = null;
-            }
+            return z;
         }
 
-        public void RemoveAll()
+        public double GetLength()
         {
-            for (int i = 0; i < points.Length; i++)
-                points[i] = null;
-        }
 
-        public Point GetPoint(int index)
-        {
-            if (index >= 0 && index < points.Length)
-                return points[index];
+            double xd = (double) Math.Pow(x, 2);
+            double yd = (double) Math.Pow(y, 2);
+            double zd = (double)Math.Pow(z, 2);
 
-            return null;
-        }
+            return Math.Sqrt(xd + yd + zd);
 
-        public bool IsProperVector()
-        {
-            int realPoints = 0;
-
-            for (int i = 0; i < points.Length; i++)
-            {
-                if (points[i] != null) realPoints++;
-            }
-
-            return realPoints == points.Length;
         }
 
         public void Enlarge(float factor)
         {
 
-            if (!IsProperVector())
-                return;
-
-            Point p1 = points[0];
-            Point p2 = points[1];
-
-            float deltaX = p2.GetX() - p1.GetX();
-            float deltaY = p2.GetY() - p1.GetY();
-            float deltaZ = p2.GetZ() - p1.GetZ();
-
-            p2.SetX(deltaX*factor);
-            p2.SetY(deltaY*factor);
-            p2.SetZ(deltaZ*factor);
+            x *= factor;
+            y *= factor;
+            z *= factor;
 
         }
 

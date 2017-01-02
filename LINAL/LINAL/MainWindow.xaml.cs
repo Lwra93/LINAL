@@ -28,25 +28,20 @@ namespace LINAL
 
         public void Calc()
         {
-            
-            Matrix m1 = new Matrix(2,3);
-            m1.Add(0,0,4);
-            m1.Add(0,1,3);
-            m1.Add(0,2,5);
-            m1.Add(1,0,1);
-            m1.Add(1,1,3);
-            m1.Add(1,2,3);
 
-            m1.Print();
-            Point p = new Point(3,5);
-            m1.Rotate2D(10, p);
+            Point P = new Point(3, -1, 2);
+            Point Q = new Point(1, 3, 4);
+            Point S = new Point(2, 3, 2);
 
-            m1.Print();
+            Plane plane = new Plane();
+            plane.Add(P);
+            plane.Add(Q);
+            plane.Add(S);
 
+            plane.BuildFormula();
 
-
-
-
+            var inp = plane.GetInproduct(plane.GetDirectionalVectors()[0], plane.GetDirectionalVectors()[1]);
+            Console.WriteLine(plane.GetAngleFromInproduct(inp));
 
         }
 

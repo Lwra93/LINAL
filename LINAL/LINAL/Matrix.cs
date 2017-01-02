@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Resources;
 using System.Text;
@@ -10,35 +11,21 @@ namespace LINAL
     class Matrix
     {
 
-        private int _rows;
-        private int _columns;
         private float[,] _data;
 
         public Matrix(int rows, int columns)
         {
-            this._rows = rows;
-            this._columns = columns;
             _data = new float[rows,columns];
         }
 
         public int GetRows()
         {
-            return _rows;
-        }
-
-        public void SetRows(int rows)
-        {
-            this._rows = rows;
+            return _data.GetLength(0);
         }
 
         public int GetColumns()
         {
-            return _columns;
-        }
-
-        public void SetColumns(int columns)
-        {
-            this._columns = columns;
+            return _data.GetLength(1);
         }
 
         public float[,] GetData()
@@ -93,8 +80,6 @@ namespace LINAL
 
         public void SetSizeWithoutData(int rows, int columns)
         {
-            _rows = rows;
-            _columns = columns;
             _data = new float[rows,columns];
         }
 
@@ -160,47 +145,95 @@ namespace LINAL
 
         }
 
+        public void Rotate3D(double angle, Rotation r, Point p = null)
+        {
+            Rotate(angle, true, r, p);
+        }
+
         public void Rotate2D(double angle, Point p = null)
         {
+            Rotate(angle, false, Rotation.Undefined, p);
+        }
 
-            //Rotate around offspring
-            if (p == null)
+        public void Rotate(double angle, bool threedim, Rotation r, Point p = null)
+        {
+
+            if (!threedim)
             {
-                Matrix rotation = MatrixFactory.Rotate2D(angle);
-                Matrix result = MatrixFactory.Multiply(rotation, this);
-                if (result != null)
-                    _data = result.GetData();
+                //Rotate around offspring
+                if (p == null)
+                {
+                    Matrix rotation = MatrixFactory.Rotate2D(angle);
+                    Matrix result = MatrixFactory.Multiply(rotation, this);
+                    if (result != null)
+                        _data = result.GetData();
+                }
+                else
+                {
+
+                    Point inverse = new Point(-p.GetX(), -p.GetY(), -p.GetZ());
+                    Translate(inverse);
+                    Matrix rotation = MatrixFactory.Rotate2D(angle);
+                    Matrix result = MatrixFactory.Multiply(rotation, this);
+
+                    if (result != null)
+                        _data = result.GetData();
+
+                    Translate(p);
+
+                }
             }
             else
             {
-                
-                Point inverse = new Point(-p.GetX(), -p.GetY(), -p.GetZ());
-                Translate(inverse);
-                Matrix rotation = MatrixFactory.Rotate2D(angle);
-                Matrix result = MatrixFactory.Multiply(rotation, this);
 
-                if (result != null)
-                    _data = result.GetData();
-
-                Translate(p);
+                if (r == Rotation.Undefined)
+                    return;
 
             }
+
+        }
+
+        public int GetHighestInRow(int column)
+        {
+
+            int num = 0;
+            for (int i = 0; i < GetRows(); i++)
+            {
+                if (_data[i, column] > num)
+                    num = i;
+            }
+
+            return num;
 
         }
 
         public void AddHelpRow()
         {
             
-            SetSizeWithData(_rows+1,_columns);
+            SetSizeWithData(GetRows()+1,GetColumns());
 
-            for (int i = 0; i < _columns; i++)
-                _data[_rows-1, i] = 1;
+            for (int i = 0; i < GetColumns(); i++)
+                _data[GetRows()-1, i] = 1;
 
         }
 
         public void RemoveHelpRow()
         {
-            SetSizeWithData(_rows - 1, _columns);
+            SetSizeWithData(GetRows() - 1, GetColumns());
+        }
+
+        public void SwitchValues(int row1, int row2)
+        {
+
+            for (int i = 0; i < GetColumns(); i++)
+            {
+
+                float backup = _data[row1, i];
+                _data[row1, i] = _data[row2, i];
+                _data[row2, i] = backup;
+
+            }
+
         }
 
         public void Print()
@@ -220,10 +253,115 @@ namespace LINAL
 
         public void Invert()
         {
-            //TODO
+
+            if (GetDeterminant() == 0)
+                return;
+
+            Matrix inversion = new Matrix(GetRows(), GetRows());
+            inversion.MakeIdentityMatrix();
+
+            if (_data[0, 0] == 0f)
+            {
+                int row = GetHighestInRow(0);
+                SwitchValues(0,row);
+                inversion.SwitchValues(0,row);
+            }
+
+            for (int column = 0; column < GetColumns(); column++)
+            {
+
+                if (_data[column, column] != 1)
+                {
+                    float divideBy = _data[column, column];
+                    ModifyRow(divideBy, Operator.DIVIDE, column);
+                    inversion.ModifyRow(divideBy, Operator.DIVIDE, column);
+                }
+
+                for (int row = 0; row < GetRows(); row++)
+                {
+                    if (row == column)
+                        continue;
+
+                    if (_data[row, column] == 0)
+                        continue;
+
+                    float multiplyBy = _data[row, column]/_data[column, column];
+
+                    for (int col = 0; col < GetColumns(); col++)
+                    {
+                        float value = _data[column, col]*multiplyBy;
+                        float inversionValue = inversion.Get(column, col)*multiplyBy;
+
+                        ModifyRow(value, Operator.SUBTRACT, row, col);
+                        inversion.ModifyRow(inversionValue, Operator.SUBTRACT, row, col);
+                    }
+
+                }
+
+            }
+
+            _data = inversion.GetData();
+
         }
 
-        
 
+
+        public void ModifyRow(float value, Operator op, int row, int column = -1)
+        {
+
+            if (column > -1)
+            {
+                if (op == Operator.ADD)
+                    _data[row, column] += value;
+                else if (op == Operator.SUBTRACT)
+                    _data[row, column] -= value;
+                else if (op == Operator.DIVIDE)
+                    _data[row, column] /= value;
+                else if (op == Operator.MULTIPLY)
+                    _data[row, column] *= value;
+
+                return;
+            }
+
+            for (column = 0; column < GetColumns(); column++)
+            {
+
+                if (op == Operator.ADD)
+                    _data[row, column] += value;
+                else if (op == Operator.SUBTRACT)
+                    _data[row, column] -= value;
+                else if (op == Operator.DIVIDE)
+                    _data[row, column] /= value;
+                else if (op == Operator.MULTIPLY)
+                    _data[row, column] *= value;
+
+            }
+
+
+        }
+
+        public float GetDeterminant()
+        {
+            //2D
+            if (GetColumns() < 3)
+                return _data[0, 0]*_data[1, 1] - _data[0, 1]*_data[1, 0];
+
+            //3D
+            else
+            {
+                float a = _data[0, 0]*(_data[1, 1]*_data[2, 2] - _data[1, 2]*_data[2, 1]);
+                float b = _data[0, 1] * (_data[1, 0] * _data[2, 2] - _data[2, 0] * _data[1, 2]);
+                float c = _data[0, 2] * (_data[1, 0] * _data[2, 1] - _data[2, 0] * _data[1, 1]);
+                return a - b - c;
+            }
+        }
+    }
+
+    public enum Operator
+    {
+        ADD = 0,
+        SUBTRACT = 1,
+        DIVIDE = 2,
+        MULTIPLY = 3,
     }
 }
