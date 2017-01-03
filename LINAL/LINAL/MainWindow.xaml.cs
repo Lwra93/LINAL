@@ -27,7 +27,7 @@ namespace LINAL
         }
 
         public void Calc()
-        {
+        { 
 
             Point P = new Point(3, -1, 2);
             Point Q = new Point(1, 3, 4);
@@ -40,8 +40,7 @@ namespace LINAL
 
             plane.BuildFormula();
 
-            var inp = plane.GetInproduct(plane.GetDirectionalVectors()[0], plane.GetDirectionalVectors()[1]);
-            Console.WriteLine(plane.GetAngleFromInproduct(inp));
+           
 
         }
 

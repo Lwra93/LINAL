@@ -10,7 +10,7 @@ namespace LINAL
     class Plane
     {
 
-        private List<Point> points = new List<Point>();
+        private readonly List<Point> _points = new List<Point>();
 
         private float formulaX;
         private float formulaY;
@@ -20,28 +20,28 @@ namespace LINAL
 
         public void Add(Point p)
         {
-            points.Add(p);
+            _points.Add(p);
         }
 
         public void Remove(Point p)
         {
-            points.Remove(p);
+            _points.Remove(p);
         }
 
         public void Remove(int index)
         {
-            points.RemoveAt(index);
+            _points.RemoveAt(index);
         }
 
         public List<Point> GetPoints()
         {
-            return points;
+            return _points;
         }
 
         public Vector GetSupportVector()
         {
 
-            Point p = points[0];
+            Point p = _points[0];
             return new Vector(p.GetX(), p.GetY(), p.GetZ());
 
         }
@@ -79,17 +79,19 @@ namespace LINAL
 
         public float GetInproduct(Vector v1, Vector v2)
         {
-
+            //ax*bx + ay*by + az*bz
             return v1.GetX()*v2.GetX() + v1.GetY()*v2.GetY() + v1.GetZ()*v2.GetZ();
-
         }
 
-        public Vector GetCrossProduct(List<Vector> vectors)
+        public Vector GetCrossProduct(List<Vector> vectors = null)
         {
 
-            float x = vectors[0].GetY()*vectors[1].GetZ() - vectors[1].GetY()*vectors[0].GetZ();
-            float y = vectors[1].GetX()*vectors[0].GetZ() - vectors[0].GetX()*vectors[1].GetZ();
-            float z = vectors[0].GetX()*vectors[1].GetY() - vectors[1].GetX()*vectors[0].GetY();
+            if (vectors == null)
+                vectors = GetDirectionalVectors();
+
+            var x = vectors[0].GetY()*vectors[1].GetZ() - vectors[1].GetY()*vectors[0].GetZ();
+            var y = vectors[1].GetX()*vectors[0].GetZ() - vectors[0].GetX()*vectors[1].GetZ();
+            var z = vectors[0].GetX()*vectors[1].GetY() - vectors[1].GetX()*vectors[0].GetY();
             return new Vector(x,y,z);
 
         }
@@ -97,15 +99,15 @@ namespace LINAL
         public List<Vector> GetDirectionalVectors()
         {
 
-            List<Vector> v = new List<Vector>();
+            var v = new List<Vector>();
 
-            for (int i = 1; i < points.Count; i++)
+            for (var i = 1; i < _points.Count; i++)
             {
-                Point p = points[i];
+                var p = _points[i];
 
-                float x = p.GetX() - GetSupportVector().GetX();
-                float y = p.GetY() - GetSupportVector().GetY();
-                float z = p.GetZ() - GetSupportVector().GetZ();
+                var x = p.GetX() - GetSupportVector().GetX();
+                var y = p.GetY() - GetSupportVector().GetY();
+                var z = p.GetZ() - GetSupportVector().GetZ();
 
                 while (true)
                 {
@@ -131,7 +133,12 @@ namespace LINAL
         public void BuildFormula()
         {
 
-            var normalVector = GetCrossProduct(GetDirectionalVectors());
+            var vectors = GetDirectionalVectors();
+
+            if (vectors[0].IsDependantOf(vectors[1]))
+                return;
+
+            var normalVector = GetCrossProduct(vectors);
 
             formulaX = normalVector.GetX();
             formulaY = normalVector.GetY();
@@ -144,8 +151,8 @@ namespace LINAL
         public bool IsProperPlane()
         {
 
-            List<Point> p = new List<Point>();
-            foreach (Point point in points)
+            var p = new List<Point>();
+            foreach (var point in _points)
             {
                 if(!p.Contains(point))
                     p.Add(point);
