@@ -10,36 +10,7 @@ namespace LINAL
     class MatrixFactory
     {
 
-        public static Matrix Multiply(Matrix m1, Matrix m2)
-        {
-
-            if (m1.GetColumns() != m2.GetRows())
-                return null;
-
-            Matrix result = new Matrix(m1.GetRows(), m2.GetColumns());
-
-            for (int i2 = 0; i2 < m2.GetColumns(); i2++)
-            {
-
-                for (int j2 = 0; j2 < m2.GetRows(); j2++)
-                {
-
-                    for (int i = 0; i < m1.GetRows(); i++)
-                    {
-
-                        float number = 0;
-
-                        for (int j3 = 0; j3 < m2.GetRows(); j3++) //Of columns. Maakt niet uit. Rows M1 == Columns M2
-                            number += m1.Get(i, j3)*m2.Get(j3, i2);
-
-                        result.Add(i, i2, number);
-                    }
-
-                }
-            }
-
-            return result;
-        }
+        
 
         public static Matrix GetScaleAndTranslate(Matrix scaling, Matrix translate)
         {
@@ -90,13 +61,13 @@ namespace LINAL
 
         }
 
-        public static Matrix Rotate2D(double alpha)
+        public static Matrix Rotate2D(float alpha)
         {
 
             Matrix rotationMatrix = new Matrix(2,2);
 
-            float cos = (float) Math.Cos(alpha*(Math.PI/180.0));
-            float sin = (float) Math.Sin(alpha*(Math.PI/180.0));
+            float cos = GonioFactory.GetTrigonometricByDegrees(alpha, Trigonometric.Cosine);
+            float sin = GonioFactory.GetTrigonometricByDegrees(alpha, Trigonometric.Sine);
 
             float[,] data = {
                 {cos,-sin},
@@ -109,12 +80,15 @@ namespace LINAL
 
         }
 
-        public static Matrix Rotate3DXAxis(Matrix m, double alpha)
+        public static Matrix Rotate3DXAxis(float alpha, bool reverse)
         {
 
             Matrix rotationMatrix = new Matrix(3, 3);
-            float cos = (float)Math.Cos(alpha * (Math.PI / 180.0));
-            float sin = (float)Math.Sin(alpha * (Math.PI / 180.0));
+            float cos = GonioFactory.GetTrigonometricByDegrees(alpha, Trigonometric.Cosine);
+            float sin = GonioFactory.GetTrigonometricByDegrees(alpha, Trigonometric.Sine);
+
+            if (reverse)
+                sin = -sin;
 
             float[,] data = { 
                 {1,0,0},
@@ -128,12 +102,15 @@ namespace LINAL
 
         }
 
-        public static Matrix Rotate3DYAxis(Matrix m, double alpha)
+        public static Matrix Rotate3DYAxis(float alpha, bool reverse)
         {
 
             Matrix rotationMatrix = new Matrix(3, 3);
-            float cos = (float)Math.Cos(alpha * (Math.PI / 180.0));
-            float sin = (float)Math.Sin(alpha * (Math.PI / 180.0));
+            float cos = GonioFactory.GetTrigonometricByDegrees(alpha, Trigonometric.Cosine);
+            float sin = GonioFactory.GetTrigonometricByDegrees(alpha, Trigonometric.Sine);
+
+            if (reverse)
+                sin = -sin;
 
             float[,] data = {
                 {cos, 0, -sin},
@@ -147,12 +124,15 @@ namespace LINAL
 
         }
 
-        public static Matrix Rotate3DZAxis(Matrix m, double alpha)
+        public static Matrix Rotate3DZAxis(float alpha, bool reverse)
         {
 
             Matrix rotationMatrix = new Matrix(3, 3);
-            float cos = (float)Math.Cos(alpha * (Math.PI / 180.0));
-            float sin = (float)Math.Sin(alpha * (Math.PI / 180.0));
+            float cos = GonioFactory.GetTrigonometricByDegrees(alpha, Trigonometric.Cosine);
+            float sin = GonioFactory.GetTrigonometricByDegrees(alpha, Trigonometric.Sine);
+
+            if (reverse)
+                sin = -sin;
 
             float[,] data = {
                 {cos, -sin, 0},

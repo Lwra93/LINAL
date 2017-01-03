@@ -27,20 +27,10 @@ namespace LINAL
         }
 
         public void Calc()
-        { 
+        {
 
-            Point P = new Point(3, -1, 2);
-            Point Q = new Point(1, 3, 4);
-            Point S = new Point(2, 3, 2);
+            Camera camera = new Camera();
 
-            Plane plane = new Plane();
-            plane.Add(P);
-            plane.Add(Q);
-            plane.Add(S);
-
-            plane.BuildFormula();
-
-           
 
         }
 

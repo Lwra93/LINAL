@@ -48,7 +48,7 @@ namespace LINAL
 
         public Vector GetNormalVector()
         {
-            return null;
+            return GetCrossProduct(GetDirectionalVectors());
         }
 
         public double GetRadiansFromInproduct(float inproduct)

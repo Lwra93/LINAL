@@ -5,6 +5,7 @@ using System.Linq;
 using System.Resources;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xaml;
 
 namespace LINAL
 {
@@ -123,10 +124,7 @@ namespace LINAL
             }
                 
 
-            Matrix result = MatrixFactory.Multiply(translation, this);
-
-            if(result != null)
-                _data = result.GetData();
+            Multiply(translation);
 
             if(addedHelpRow)
                 RemoveHelpRow();
@@ -138,24 +136,21 @@ namespace LINAL
         {
 
             Matrix scaling = MatrixFactory.GetScalingMatrix(this, p);
-            Matrix result = MatrixFactory.Multiply(scaling, this);
-
-            if (result != null)
-                _data = result.GetData();
+            Multiply(scaling);
 
         }
 
-        public void Rotate3D(double angle, Rotation r, Point p = null)
+        public void Rotate3D(float angle, Rotation r, Point p = null)
         {
             Rotate(angle, true, r, p);
         }
 
-        public void Rotate2D(double angle, Point p = null)
+        public void Rotate2D(float angle, Point p = null)
         {
             Rotate(angle, false, Rotation.Undefined, p);
         }
 
-        public void Rotate(double angle, bool threedim, Rotation r, Point p = null)
+        public void Rotate(float angle, bool threedim, Rotation r, Point p = null)
         {
 
             if (!threedim)
@@ -164,9 +159,7 @@ namespace LINAL
                 if (p == null)
                 {
                     Matrix rotation = MatrixFactory.Rotate2D(angle);
-                    Matrix result = MatrixFactory.Multiply(rotation, this);
-                    if (result != null)
-                        _data = result.GetData();
+                    Multiply(rotation);
                 }
                 else
                 {
@@ -174,11 +167,7 @@ namespace LINAL
                     Point inverse = new Point(-p.GetX(), -p.GetY(), -p.GetZ());
                     Translate(inverse);
                     Matrix rotation = MatrixFactory.Rotate2D(angle);
-                    Matrix result = MatrixFactory.Multiply(rotation, this);
-
-                    if (result != null)
-                        _data = result.GetData();
-
+                    Multiply(rotation);
                     Translate(p);
 
                 }
@@ -188,6 +177,40 @@ namespace LINAL
 
                 if (r == Rotation.Undefined)
                     return;
+
+                for (int column = 0; column < GetColumns(); column++)
+                {
+                    float x = _data[0, column];
+                    float y = _data[1, column];
+                    float z = _data[2, column];
+
+                    Matrix sub = new Matrix(3,1);
+                    float[,] data = {{x}, {y}, {z}};
+                    sub.SetData(data);
+
+                    float t1 = GonioFactory.GetArcTrigonometricByRadians(z, x, Trigonometric.Tangent2);
+                    var yRotation = MatrixFactory.Rotate3DYAxis(t1, true);
+                    sub.Multiply(yRotation);
+
+                    float newX = (float)Math.Sqrt(x*x + z*z);
+                    float t2 = GonioFactory.GetArcTrigonometricByRadians(y, newX, Trigonometric.Tangent2);
+                    var zRotation = MatrixFactory.Rotate3DZAxis(t2, true);
+
+                    Matrix rotate = MatrixFactory.Rotate3DXAxis(angle, false);
+
+                    sub.Multiply(rotate);
+
+                    var reverseZRotation = MatrixFactory.Rotate3DZAxis(t2, false);
+                    sub.Multiply(reverseZRotation);
+
+                    var reverseYRotation = MatrixFactory.Rotate3DYAxis(t1, false);
+                    sub.Multiply(reverseYRotation);
+
+                    _data[0, column] = sub.Get(0, column);
+                    _data[1, column] = sub.Get(1, column);
+                    _data[2, column] = sub.Get(2, column);
+
+                }
 
             }
 
@@ -354,6 +377,39 @@ namespace LINAL
                 float c = _data[0, 2] * (_data[1, 0] * _data[2, 1] - _data[2, 0] * _data[1, 1]);
                 return a - b - c;
             }
+        }
+
+        public void Multiply(Matrix matrix)
+        {
+
+            if (matrix.GetColumns() != GetRows())
+                return;
+
+            Matrix result = new Matrix(matrix.GetRows(), GetColumns());
+
+            for (int i2 = 0; i2 < GetColumns(); i2++)
+            {
+
+                for (int j2 = 0; j2 < GetRows(); j2++)
+                {
+
+                    for (int i = 0; i < matrix.GetRows(); i++)
+                    {
+
+                        float number = 0;
+
+                        for (int j3 = 0; j3 < GetRows(); j3++) //Of columns. Maakt niet uit. Rows M1 == Columns M2
+                            number += matrix.Get(i, j3) * Get(j3, i2);
+
+                        result.Add(i, i2, number);
+                    }
+
+                }
+            }
+
+
+            _data = result.GetData();
+
         }
     }
 
