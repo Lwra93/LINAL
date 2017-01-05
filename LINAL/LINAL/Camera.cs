@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,50 +11,56 @@ namespace LINAL
     class Camera
     {
 
-        private readonly Vector _eye;
-        private readonly Vector _lookAt;
-        private readonly Vector _up;
+        private Vector _eye;
+        private Vector _lookAt;
+        private Vector _up;
 
         private Vector _x, _y, _z;
 
         public Camera()
         {
             
-            this._eye = new Vector(2,2,2,1);
-            this._lookAt = new Vector(1,1,1,1);
-            this._up = new Vector(0,1,0,1);
+            Point eyePoint = new Point(45, 45, -30);
+            Point lookAtPoint = new Point(45, 45,-45);
+            Point upPoint = new Point(0,1,0);
+
+            this._eye = eyePoint.MakeVector();
+            _eye.SetHelp(1);
+            this._lookAt = lookAtPoint.MakeVector();
+            _lookAt.SetHelp(1);
+            this._up = upPoint.MakeVector();
+            _up.SetHelp(1);
 
             SetVectors();
+
         }
 
-        public Matrix Get(int screenSize)
+        public void turn(float alpha)
         {
             
-            Recalculate(screenSize);
-            SetVectors();
-            return GetCamera();
+            Matrix m = new Matrix(4, 1);
+            float[,] data1 =
+            {
+                {
+                    _lookAt.GetX()
+                },
+                {
+                    _lookAt.GetY()
+                },
+                {
+                    _lookAt.GetZ()
+                },
+                {
+                    1
+                }
+            };
 
-        }
+            m.SetData(data1);
 
-        public void Recalculate(int screenSize)
-        {
+            m.Rotate3D(alpha, new Point(_eye.GetX(), _eye.GetY(), _eye.GetZ()));
 
-            float eyeX = (float) ((screenSize/2) + ((_eye.GetX() + 1)/_eye.GetHelp())*screenSize*0.5);
-            float eyeY = (float)((screenSize / 2) + ((_eye.GetY() + 1) / _eye.GetHelp()) * screenSize * 0.5);
-            float eyeZ = -_eye.GetZ();
-
-            _eye.SetX(eyeX);
-            _eye.SetY(eyeY);
-            _eye.SetZ(eyeZ);
-
-            float lookAtX = (float)((screenSize / 2) + ((_lookAt.GetX() + 1) / _eye.GetHelp()) * screenSize * 0.5);
-            float lookAtY = (float)((screenSize / 2) + ((_lookAt.GetY() + 1) / _eye.GetHelp()) * screenSize * 0.5);
-            float lookAtZ = -_lookAt.GetZ();
-
-            _lookAt.SetX(eyeX);
-            _lookAt.SetY(eyeY);
-            _lookAt.SetZ(eyeZ);
-
+            Point p = new Point(m.Get(0, 0), m.Get(1, 0), m.Get(2, 0));
+            this._lookAt = p.MakeVector();
             SetVectors();
 
         }
@@ -61,22 +68,19 @@ namespace LINAL
         public void SetVectors()
         {
             _z = _eye.Subtract(_lookAt);
-            _z.MakeUnitVector();
-
             _y = _up;
-            _y.MakeUnitVector();
-
             _x = _y.GetCrossProduct(_z);
-            _x.MakeUnitVector();
-
             _y = _z.GetCrossProduct(_x);
+
+            _x.MakeUnitVector();
             _y.MakeUnitVector();
+            _z.MakeUnitVector();
         }
 
-        public Matrix GetCamera()
+        public Matrix Get()
         {
 
-            Matrix m = new Matrix(4, 4);
+            Matrix cameraMatrix = new Matrix(4, 4);
             float[,] data =
             {
                 {
@@ -93,9 +97,9 @@ namespace LINAL
                 }
             };
 
-            m.SetData(data);
+            cameraMatrix.SetData(data);
 
-            return m;
+            return cameraMatrix;
 
 
         }

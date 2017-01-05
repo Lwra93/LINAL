@@ -12,6 +12,15 @@ namespace LINAL
 
         private float _near, _far, _fieldOfView;
 
+        public Perspective(float near, float far)
+        {
+
+            _near = near;
+            _far = far;
+            _fieldOfView = 90;
+
+        }
+
         public void SetFieldOfView(float fieldOfView)
         {
             this._fieldOfView = fieldOfView;

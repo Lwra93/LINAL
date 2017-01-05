@@ -9,7 +9,7 @@ using System.Xaml;
 
 namespace LINAL
 {
-    class Matrix
+    public class Matrix
     {
 
         private float[,] _data;
@@ -51,6 +51,34 @@ namespace LINAL
         {
             if (row >= 0 && row < _data.GetLength(0) && column >= 0 && column < _data.GetLength(1))
                 _data[row, column] = number;
+        }
+
+        public void AddVector(int column, Vector v)
+        {
+
+            if (GetRows() < 4)
+                SetSizeWithData(4, GetColumns());
+
+            if(column >= GetColumns())
+                SetSizeWithData(GetRows(), GetColumns()+1);
+            if (column >= GetColumns())
+                SetSizeWithData(GetRows(), GetColumns() + 1);
+
+            if (column >= 0)
+            {
+                _data[0, column] = v.GetPoint(0).GetX();
+                _data[1, column] = v.GetPoint(0).GetY();
+                _data[2, column] = v.GetPoint(0).GetZ();
+                if (v.GetHelp() > 0)
+                    _data[3, column] = 1;
+
+                _data[0, column+1] = v.GetPoint(1).GetX();
+                _data[1, column+1] = v.GetPoint(1).GetY();
+                _data[2, column+1] = v.GetPoint(1).GetZ();
+                if (v.GetHelp() > 0)
+                    _data[3, column+1] = 1;
+            }
+
         }
 
         public void Remove(int row, int column)
@@ -140,17 +168,17 @@ namespace LINAL
 
         }
 
-        public void Rotate3D(float angle, Rotation r, Point p = null)
+        public void Rotate3D(float angle, Point p = null)
         {
-            Rotate(angle, true, r, p);
+            Rotate(angle, true, p);
         }
 
         public void Rotate2D(float angle, Point p = null)
         {
-            Rotate(angle, false, Rotation.Undefined, p);
+            Rotate(angle, false, p);
         }
 
-        public void Rotate(float angle, bool threedim, Rotation r, Point p = null)
+        public void Rotate(float angle, bool threedim, Point p = null)
         {
 
             if (!threedim)
@@ -175,8 +203,8 @@ namespace LINAL
             else
             {
 
-                if (r == Rotation.Undefined)
-                    return;
+                if(p != null)
+                    Translate(new Point(-p.GetX(), -p.GetY(), -p.GetZ()));
 
                 for (int column = 0; column < GetColumns(); column++)
                 {
@@ -190,27 +218,37 @@ namespace LINAL
 
                     float t1 = GonioFactory.GetArcTrigonometricByRadians(z, x, Trigonometric.Tangent2);
                     var yRotation = MatrixFactory.Rotate3DYAxis(t1, true);
-                    sub.Multiply(yRotation);
+                    yRotation.Multiply(sub);
+
+                    sub = yRotation;
 
                     float newX = (float)Math.Sqrt(x*x + z*z);
                     float t2 = GonioFactory.GetArcTrigonometricByRadians(y, newX, Trigonometric.Tangent2);
                     var zRotation = MatrixFactory.Rotate3DZAxis(t2, true);
+                    zRotation.Multiply(sub);
+                    sub = zRotation;
 
                     Matrix rotate = MatrixFactory.Rotate3DXAxis(angle, false);
 
-                    sub.Multiply(rotate);
+                    rotate.Multiply(sub);
+                    sub = rotate;
 
                     var reverseZRotation = MatrixFactory.Rotate3DZAxis(t2, false);
-                    sub.Multiply(reverseZRotation);
+                    reverseZRotation.Multiply(sub);
+                    sub = reverseZRotation;
 
                     var reverseYRotation = MatrixFactory.Rotate3DYAxis(t1, false);
-                    sub.Multiply(reverseYRotation);
+                    reverseYRotation.Multiply(sub);
+                    sub = reverseYRotation;
 
                     _data[0, column] = sub.Get(0, column);
                     _data[1, column] = sub.Get(1, column);
                     _data[2, column] = sub.Get(2, column);
 
                 }
+
+                if(p != null)
+                    Translate(p);
 
             }
 
@@ -382,26 +420,27 @@ namespace LINAL
         public void Multiply(Matrix matrix)
         {
 
-            if (matrix.GetColumns() != GetRows())
+            if (matrix.GetRows() != GetColumns())
                 return;
 
-            Matrix result = new Matrix(matrix.GetRows(), GetColumns());
+            Matrix result = new Matrix(GetRows(), matrix.GetColumns());
 
-            for (int i2 = 0; i2 < GetColumns(); i2++)
+            for (int secondColumns = 0; secondColumns < matrix.GetColumns(); secondColumns++)
             {
 
-                for (int j2 = 0; j2 < GetRows(); j2++)
+                for (int secondRows = 0; secondRows < matrix.GetRows(); secondRows++)
                 {
 
-                    for (int i = 0; i < matrix.GetRows(); i++)
+                    for (int firstRows = 0; firstRows < GetRows(); firstRows++)
                     {
+                        float num = 0;
 
-                        float number = 0;
+                        for (int firstColumns = 0; firstColumns < GetColumns(); firstColumns++)
+                            num += Get(firstRows, firstColumns) * matrix.Get(firstColumns, secondColumns);
 
-                        for (int j3 = 0; j3 < GetRows(); j3++) //Of columns. Maakt niet uit. Rows M1 == Columns M2
-                            number += matrix.Get(i, j3) * Get(j3, i2);
+                        result.Add(firstRows, secondColumns, num);
+                        
 
-                        result.Add(i, i2, number);
                     }
 
                 }
@@ -411,6 +450,61 @@ namespace LINAL
             _data = result.GetData();
 
         }
+
+        public Matrix ConvertToVectors()
+        {
+
+            Matrix m = new Matrix(GetRows(), GetColumns()/2);
+            float[,] data = new float[GetRows(),GetColumns()/2];
+
+
+            for (int column = 0; column < GetColumns()/2; column++)
+            {
+
+                float x = _data[0, column + 1] - _data[0, column];
+                float y = _data[1, column + 1] - _data[1, column];
+                float z = _data[2, column + 1] - _data[2, column];
+
+                data[0, column] = x;
+                data[1, column] = y;
+                data[2, column] = z;
+                data[3, column] = 1;
+
+                column++;
+
+            }
+
+            m.SetData(data);
+
+            return m;
+        }
+
+        public void Recalculate(double screenSize)
+        {
+
+            for (int column = 0; column < _data.GetLength(1); column++)
+            {
+
+                float x = _data[0, column + 1] - _data[0, column];
+                float y = _data[1, column + 1] - _data[1, column];
+                float z = _data[2, column + 1] - _data[2, column];
+                float w = _data[3, column + 1] - _data[3, column];
+
+                x = (float) ((screenSize / 2) + ((x + 1) / w) * screenSize * 0.5);
+                y = (float)((screenSize / 2) + ((y + 1) / w) * screenSize * 0.5);
+                z = -z;
+
+                _data[0, column + 1] = x;
+                _data[1, column + 1] = y;
+                _data[2, column + 1] = z;
+                _data[3, column + 1] = w;
+
+                column++;
+
+            }
+
+        }
+
     }
 
     public enum Operator

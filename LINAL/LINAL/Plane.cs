@@ -41,8 +41,9 @@ namespace LINAL
         public Vector GetSupportVector()
         {
 
+            return null;
             Point p = _points[0];
-            return new Vector(p.GetX(), p.GetY(), p.GetZ());
+            //return new Vector(p.GetX(), p.GetY(), p.GetZ());
 
         }
 
@@ -86,48 +87,50 @@ namespace LINAL
         public Vector GetCrossProduct(List<Vector> vectors = null)
         {
 
+            return null;
+
             if (vectors == null)
                 vectors = GetDirectionalVectors();
 
             var x = vectors[0].GetY()*vectors[1].GetZ() - vectors[1].GetY()*vectors[0].GetZ();
             var y = vectors[1].GetX()*vectors[0].GetZ() - vectors[0].GetX()*vectors[1].GetZ();
             var z = vectors[0].GetX()*vectors[1].GetY() - vectors[1].GetX()*vectors[0].GetY();
-            return new Vector(x,y,z);
+            //return new Vector(x,y,z);
 
         }
 
         public List<Vector> GetDirectionalVectors()
         {
+            return null;
+            //var v = new List<Vector>();
 
-            var v = new List<Vector>();
+            //for (var i = 1; i < _points.Count; i++)
+            //{
+            //    var p = _points[i];
 
-            for (var i = 1; i < _points.Count; i++)
-            {
-                var p = _points[i];
+            //    var x = p.GetX() - GetSupportVector().GetX();
+            //    var y = p.GetY() - GetSupportVector().GetY();
+            //    var z = p.GetZ() - GetSupportVector().GetZ();
 
-                var x = p.GetX() - GetSupportVector().GetX();
-                var y = p.GetY() - GetSupportVector().GetY();
-                var z = p.GetZ() - GetSupportVector().GetZ();
-
-                while (true)
-                {
-                    if (x%2 == 0 && y%2 == 0 && z%2 == 0)
-                    {
-                        x /= 2;
-                        y /= 2;
-                        z /= 2;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
+            //    while (true)
+            //    {
+            //        if (x%2 == 0 && y%2 == 0 && z%2 == 0)
+            //        {
+            //            x /= 2;
+            //            y /= 2;
+            //            z /= 2;
+            //        }
+            //        else
+            //        {
+            //            break;
+            //        }
+            //    }
 
 
-                v.Add(new Vector(x,y,z));
-            }
+            //    v.Add(new Vector(x,y,z));
+            //}
 
-            return v;
+            //return v;
         }
 
         public void BuildFormula()

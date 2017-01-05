@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LINAL
 {
-    class Point
+    public class Point
     {
 
         private float x;
@@ -59,6 +59,16 @@ namespace LINAL
         public bool Is3D()
         {
             return z > 0;
+        }
+
+        public Vector MakeVector()
+        {
+            
+            Point p2 = new Point(x,y,z);
+            Point p1 = new Point(0,0,0);
+
+            return new Vector(p1, p2);
+
         }
 
     }

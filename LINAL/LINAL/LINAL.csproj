@@ -55,9 +55,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Camera.cs" />
     <Compile Include="GonioFactory.cs" />
     <Compile Include="Matrix.cs" />
     <Compile Include="MatrixFactory.cs" />
+    <Compile Include="Perspective.cs" />
     <Compile Include="Plane.cs" />
     <Compile Include="Point.cs" />
     <Compile Include="Properties\Resources.Designer.cs">

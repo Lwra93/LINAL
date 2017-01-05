@@ -6,55 +6,38 @@ using System.Threading.Tasks;
 
 namespace LINAL
 {
-    class Vector
+    public class Vector
     {
 
-        private float x, y, z, help;
-
-        public Vector(float x, float y, float z, float help = 0)
-        {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-            this.help = help;
-        }
+        private Point[] points = new Point[2];
+        private float help;
 
         public Vector(Point p1, Point p2)
         {
-            this.x = p2.GetX() - p1.GetX();
-            this.y = p2.GetY() - p1.GetY();
-            this.z = p2.GetZ() - p1.GetZ();
-            this.help = 0;
+
+            points[0] = p1;
+            points[1] = p2;
+            this.help = 1;
+        }
+
+        public Point GetPoint(int index)
+        {
+            return points[index];
         }
 
         public float GetX()
         {
-            return x;
+            return points[1].GetX() - points[0].GetX();
         }
 
         public float GetY()
         {
-            return y;
+            return points[1].GetY() - points[0].GetY();
         }
 
         public float GetZ()
         {
-            return z;
-        }
-
-        public void SetX(float x)
-        {
-            this.x = x;
-        }
-
-        public void SetY(float y)
-        {
-            this.y = y;
-        }
-
-        public void SetZ(float z)
-        {
-            this.z = z;
+            return points[1].GetZ() - points[0].GetZ();
         }
 
         public float GetHelp()
@@ -69,15 +52,15 @@ namespace LINAL
 
         public float GetLength()
         {
-            return (float) Math.Sqrt(x*x + y*y + z*z);
+            return (float) Math.Sqrt(GetX()*GetX() + GetY()*GetY() + GetZ()*GetZ());
         }
 
         public bool IsDependantOf(Vector v)
         {
 
-            var factorX = x / v.GetX();
-            var factorY = y / v.GetY();
-            var factorZ = z / v.GetZ();
+            var factorX = GetX() / v.GetX();
+            var factorY = GetY() / v.GetY();
+            var factorZ = GetZ() / v.GetZ();
 
             return factorX == factorY && factorY == factorZ;
 
@@ -86,30 +69,79 @@ namespace LINAL
         public Vector Add(Vector v)
         {
 
-            return new Vector(x + v.GetX(), y + v.GetY(), z + v.GetZ());
+            float x = GetX() + v.GetX();
+            float y = GetY() + v.GetY();
+            float z = GetZ() + v.GetZ();
+
+            Point p = new Point(GetPoint(0).GetX() + x, GetPoint(0).GetY() + y, GetPoint(0).GetZ() + z);
+
+            return new Vector(GetPoint(0), p);
 
         }
 
         public Vector Subtract(Vector v)
         {
-            return new Vector(x - v.GetX(), y - v.GetY(), z - v.GetZ());
+            float x = GetX() - v.GetX();
+            float y = GetY() - v.GetY();
+            float z = GetZ() - v.GetZ();
+
+            Point p = new Point(GetPoint(0).GetX() + x, GetPoint(0).GetX() + y, GetPoint(0).GetZ()+z);
+
+            return new Vector(GetPoint(0), p);
         }
 
         public void MakeUnitVector()
         {
             float length = GetLength();
 
-            x /= length;
-            y /= length;
-            z /= length;
+            float x = GetX() / length;
+            float y = GetY() / length;
+            float z = GetZ() / length;
+
+            points[1].SetX(x);
+            points[1].SetY(y);
+            points[1].SetZ(z);
+
         }
 
         public void Enlarge(float factor)
         {
 
-            x *= factor;
-            y *= factor;
-            z *= factor;
+            float x = GetX() * factor;
+            float y = GetY() * factor;
+            float z = GetZ() * factor;
+
+            points[1].SetX(x);
+            points[1].SetY(y);
+            points[1].SetZ(z);
+
+        }
+
+        public Vector GetSimplified()
+        {
+
+            var x = GetX();
+            var y = GetY();
+            var z = GetZ();
+
+            while (true)
+            {
+                if (x % 2 == 0 && y % 2 == 0 && z % 2 == 0)
+                {
+                    x /= 2;
+                    y /= 2;
+                    z /= 2;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            var p = new Point(points[0].GetX() + x, points[0].GetY() + y, points[0].GetZ() + z);
+
+            return new Vector(points[0], p);
+
 
         }
 
@@ -119,7 +151,14 @@ namespace LINAL
             var x = GetY() * v.GetZ() - v.GetY() * GetZ();
             var y = v.GetX() * GetZ() - GetX() * v.GetZ();
             var z = GetX() * v.GetY() - v.GetX() * GetY();
-            return new Vector(x, y, z);
+
+            var realX = points[0].GetX() + x;
+            var realY = points[0].GetY() + y;
+            var realZ = points[0].GetZ() + z;
+
+            var point = new Point(realX, realY, realZ);
+
+            return new Vector(points[0], point);
 
         }
 
@@ -141,7 +180,7 @@ namespace LINAL
 
         public void Print()
         {
-            Console.WriteLine("Vector x: " + x + ", y:" + y + ", z: " + z + ", Length: " + GetLength());
+            Console.WriteLine("Vector x: " + GetX() + ", y:" + GetY() + ", z: " + GetZ() + ", Length: " + GetLength());
         }
 
     }
