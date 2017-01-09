@@ -28,6 +28,8 @@ namespace LINAL
         private List<Matrix> weergaveVectoren;
         private Dictionary<string, Matrix> wereldVectoren;
 
+        private Point r1, r2;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -43,34 +45,43 @@ namespace LINAL
         public void CreateCube()
         {
 
-            Point A = new Point(20, 20, -20);
-            Point B = new Point(70, 20, -20);
-            Point C = new Point(70, 20, -70);
-            Point D = new Point(20, 20, -70);
+            Point A = new Point(-4, 0, 0);
+            Point B = new Point(6, 0, 0);
+            Point C = new Point(-4, 0, -2);
+            Point D = new Point(6, 0, -2);
 
-            Point E = new Point(45, 70, -45);
+            Point E = new Point(-4, 2, 0);
+            Point F = new Point(6, 2, 0);
+            Point G = new Point(-4, 2, -2);
+            Point H = new Point(6, 2, -2);
 
             Vector AB = new Vector(A, B);
-            Vector AD = new Vector(A, D);
-            Vector BC = new Vector(B, C);
+            Vector AC = new Vector(A, C);
+            Vector BD = new Vector(B, D);
             Vector CD = new Vector(C, D);
-
             Vector AE = new Vector(A, E);
-            Vector BE = new Vector(B, E);
-            Vector CE = new Vector(C, E);
-            Vector DE = new Vector(D, E);
-
+            Vector BF = new Vector(B, F);
+            Vector DH = new Vector(D, H);
+            Vector CG = new Vector(C, G);
+            Vector EF = new Vector(E, F);
+            Vector EG = new Vector(E, G);
+            Vector FH = new Vector(F, H);
+            Vector GH = new Vector(G, H);
 
             Vector[] x =
             {
                 AB,
-                AD,
-                BC,
+                AC,
+                BD,
                 CD,
                 AE,
-                BE,
-                CE,
-                DE
+                BF,
+                DH,
+                CG,
+                EF,
+                EG,
+                FH,
+                GH
             };
 
             Matrix punten = new Matrix(4, x.Length*2);
@@ -84,7 +95,11 @@ namespace LINAL
                 place += 2;
             }
 
-            wereldVectoren.Add("Triangle", punten);
+            r1 = punten.GetMiddle();
+            r1.SetZ(0);
+            r2 = punten.GetMiddle();
+
+            wereldVectoren.Add("Player", punten);
 
         }
 
@@ -149,40 +164,16 @@ namespace LINAL
         {
 
 
+            if(e.Key == Key.Q)
+                wereldVectoren["Player"].Rotate3D(10, r2, r1);
+            else if(e.Key == Key.E)
+                wereldVectoren["Player"].Rotate3D(-10, r2, r1);
 
-                wereldVectoren["Triangle"].Rotate3D(10, wereldVectoren["Triangle"].GetMiddle());
-                CreateViewVectors();
-                Draw();
-                
+
+            CreateViewVectors();
+            Draw();
 
             
-
-            return;
-
-            MyCanvas.Children.Clear();
-
-            if (e.Key == Key.Down)
-            {
-
-                Vector directional = (new Point(-2, 0, 0)).MakeVector();
-
-                for (int column = 0; column < weergaveVectoren[0].GetColumns(); column++)
-                {
-                    Vector v =
-                    (new Point(weergaveVectoren[0].Get(0, column), weergaveVectoren[0].Get(1, column),
-                        weergaveVectoren[0].Get(2, column))).MakeVector();
-                    v.Move(2, directional);
-
-                    weergaveVectoren[0].Add(0, column, v.GetPoint(1).GetX());
-                    weergaveVectoren[0].Add(1, column, v.GetPoint(1).GetY());
-                    weergaveVectoren[0].Add(2, column, v.GetPoint(1).GetZ());
-
-
-
-                }
-
-                
-            }
         }
 
 

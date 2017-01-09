@@ -161,31 +161,31 @@ namespace LINAL
 
         }
 
-        public void Scale(Point p)
+        public void Scale(float x, float y, float z = 0)
         {
 
-            Matrix scaling = MatrixFactory.GetScalingMatrix(this, p);
-            Multiply(scaling);
-
+            Matrix scaling = MatrixFactory.GetScalingMatrix(this, x, y, z);
+            scaling.Multiply(this);
+            _data = scaling.GetData();
         }
 
-        public void Rotate3D(float angle, Point p = null)
+        public void Rotate3D(float angle, Point p1, Point p2 = null)
         {
-            Rotate(angle, true, p);
+            Rotate(angle, true, p1, p2);
         }
 
-        public void Rotate2D(float angle, Point p = null)
+        public void Rotate2D(float angle, Point p1, Point p2 = null)
         {
-            Rotate(angle, false, p);
+            Rotate(angle, false, p1, p2);
         }
 
-        public void Rotate(float angle, bool threedim, Point p = null)
+        public void Rotate(float angle, bool threedim, Point p1, Point p2 = null)
         {
 
             if (!threedim)
             {
                 //Rotate around offspring
-                if (p == null)
+                if (p1 == null)
                 {
                     Matrix rotation = MatrixFactory.Rotate2D(angle);
                     Multiply(rotation);
@@ -193,33 +193,34 @@ namespace LINAL
                 else
                 {
 
-                    Point inverse = new Point(-p.GetX(), -p.GetY(), -p.GetZ());
+                    Point inverse = new Point(-p1.GetX(), -p1.GetY(), -p1.GetZ());
                     Translate(inverse);
                     Matrix rotation = MatrixFactory.Rotate2D(angle);
                     Multiply(rotation);
-                    Translate(p);
+                    Translate(p1);
 
                 }
             }
             else
             {
 
-                Translate(new Point(-p.GetX(), -p.GetY(), -p.GetZ()));
+                Vector v = null;
+                Point over = null;
 
-                for (int column = 0; column < GetColumns(); column++)
+                if (p2 == null)
+                    v = new Vector(new Point(0, 0, 0), p1);
+                else
                 {
-                    
-                    Point p1 = new Point(_data[0, column], _data[1, column], _data[2, column]);
-                    Point p2 = new Point(_data[0, column+1], _data[1, column+1], _data[2, column+1]);
-                    Vector v = new Vector(p1, p2);
 
-                    RotateReplacement(column, v, angle, p);
-                    RotateReplacement(column+1, v, angle, p);
-
-                    column++;
+                    v = new Vector(p1, p2);
+                    over = p1;
                 }
 
-                Translate(p);
+                Matrix rotation = MatrixFactory.Get3DRotationMatrix(angle, v, over);
+
+                rotation.Multiply(this);
+                _data = rotation.GetData();
+
             }
 
         }
@@ -232,31 +233,10 @@ namespace LINAL
             float z = _data[2, column];
 
             Matrix sub = new Matrix(4, 1);
-            float[,] data = { { x }, { y }, { z }, {1} };
+            float[,] data = { { x }, { y }, { z } };
             sub.SetData(data);
 
-            float t1 = GonioFactory.GetArcTrigonometricByRadians(v.GetZ(), v.GetX(), Trigonometric.Tangent2);
-            var yRotation = MatrixFactory.Rotate3DYAxis(t1, true, p != null);
-            yRotation.Multiply(sub);
-            sub = yRotation;
-
-            float newX = (float)Math.Sqrt(v.GetX() * v.GetX() + v.GetZ() * v.GetZ());
-            float t2 = GonioFactory.GetArcTrigonometricByRadians(v.GetY(), newX, Trigonometric.Tangent2);
-            var zRotation = MatrixFactory.Rotate3DZAxis(t2, true, p != null);
-            zRotation.Multiply(sub);
-            sub = zRotation;
-
-            Matrix rotate = MatrixFactory.Rotate3DXAxis(GonioFactory.DegreesToRadians(alpha), false, p != null);
-            rotate.Multiply(sub);
-            sub = rotate;
-
-            var reverseZRotation = MatrixFactory.Rotate3DZAxis(t2, false, p != null);
-            reverseZRotation.Multiply(sub);
-            sub = reverseZRotation;
-
-            var reverseYRotation = MatrixFactory.Rotate3DYAxis(t1, false, p != null);
-            reverseYRotation.Multiply(sub);
-            sub = reverseYRotation;
+            
 
             _data[0, column] = sub.Get(0, 0);
             _data[1, column] = sub.Get(1, 0);

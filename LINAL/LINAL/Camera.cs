@@ -20,8 +20,8 @@ namespace LINAL
         public Camera()
         {
             
-            Point eyePoint = new Point(45, 45, 0);
-            Point lookAtPoint = new Point(45, 45,-45);
+            Point eyePoint = new Point(0, 5, 3);
+            Point lookAtPoint = new Point(0, 0, -100);
             Point upPoint = new Point(0,1,0);
 
             this._eye = eyePoint.MakeVector();

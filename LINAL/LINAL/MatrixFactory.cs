@@ -23,15 +23,15 @@ namespace LINAL
 
         }
 
-        public static Matrix GetScalingMatrix(Matrix m, Point p)
+        public static Matrix GetScalingMatrix(Matrix m, float x, float y, float z= 0)
         {
 
             Matrix scalingMatrix = new Matrix(m.GetRows(), m.GetRows());
-            scalingMatrix.Add(0, 0, p.GetX());
-            scalingMatrix.Add(1, 1, p.GetY());
+            scalingMatrix.Add(0, 0, x);
+            scalingMatrix.Add(1, 1, y);
 
-            if (p.Is3D())
-                scalingMatrix.Add(2, 2, p.GetZ());
+            if (z != 0)
+                scalingMatrix.Add(2, 2, z);
 
             return scalingMatrix;
 
@@ -80,49 +80,58 @@ namespace LINAL
 
         }
 
-        public static Matrix Rotate3DXAxis(float alpha, bool reverse, bool rotateOverPoint)
+        public static Matrix Get3DRotationMatrix(float alpha, Vector rotationVector, Point translateOver = null)
         {
 
-            int size = 3 + (rotateOverPoint ? 1 : 0);
-            Matrix rotationMatrix = new Matrix(size, size);
+            Matrix rotationMatrix = new Matrix(4,4);
+            rotationMatrix.MakeIdentityMatrix();
 
-            float cos = GonioFactory.GetTrigonometricByRadians(alpha, Trigonometric.Cosine);
-            float sin = GonioFactory.GetTrigonometricByRadians(alpha, Trigonometric.Sine);
-
-            if (reverse)
-                sin = -sin;
-
-            if (rotateOverPoint)
+            if (translateOver != null)
             {
-                float[,] data =
-                {
-                    {1, 0, 0, 0},
-                    {0, cos, -sin, 0},
-                    {0, sin, cos, 0},
-                    {0,0,0,1 }
-                };
-                rotationMatrix.SetData(data);
+                Matrix translation =
+                    GetTranslationMatrix(new Point(-translateOver.GetX(), -translateOver.GetY(), -translateOver.GetZ()));
+                translation.Multiply(rotationMatrix);
+                rotationMatrix = translation;
             }
-            else
+
+            float t1 = GonioFactory.GetArcTrigonometricByRadians(rotationVector.GetZ(), rotationVector.GetX(), Trigonometric.Tangent2);
+            var yRotation = MatrixFactory.Rotate3DYAxis(t1, true);
+            yRotation.Multiply(rotationMatrix);
+            rotationMatrix = yRotation;
+
+            float newX = (float)Math.Sqrt(rotationVector.GetX() * rotationVector.GetX() + rotationVector.GetZ() * rotationVector.GetZ());
+            float t2 = GonioFactory.GetArcTrigonometricByRadians(rotationVector.GetY(), newX, Trigonometric.Tangent2);
+            var zRotation = MatrixFactory.Rotate3DZAxis(t2, true);
+            zRotation.Multiply(rotationMatrix);
+            rotationMatrix = zRotation;
+
+            Matrix rotate = MatrixFactory.Rotate3DXAxis(GonioFactory.DegreesToRadians(alpha), false);
+            rotate.Multiply(rotationMatrix);
+            rotationMatrix = rotate;
+
+            var reverseZRotation = MatrixFactory.Rotate3DZAxis(t2, false);
+            reverseZRotation.Multiply(rotationMatrix);
+            rotationMatrix = reverseZRotation;
+
+            var reverseYRotation = MatrixFactory.Rotate3DYAxis(t1, false);
+            reverseYRotation.Multiply(rotationMatrix);
+            rotationMatrix = reverseYRotation;
+
+            if (translateOver != null)
             {
-                float[,] data =
-                {
-                    {1, 0, 0},
-                    {0, cos, -sin},
-                    {0, sin, cos}
-                };
-                rotationMatrix.SetData(data);
+                Matrix translation = GetTranslationMatrix(translateOver);
+                translation.Multiply(rotationMatrix);
+                rotationMatrix = translation;
             }
 
             return rotationMatrix;
 
         }
 
-        public static Matrix Rotate3DYAxis(float alpha, bool reverse, bool rotateOverPoint)
+        public static Matrix Rotate3DXAxis(float alpha, bool reverse)
         {
 
-            int size = 3 + (rotateOverPoint ? 1 : 0);
-            Matrix rotationMatrix = new Matrix(size, size);
+            Matrix rotationMatrix = new Matrix(4, 4);
 
             float cos = GonioFactory.GetTrigonometricByRadians(alpha, Trigonometric.Cosine);
             float sin = GonioFactory.GetTrigonometricByRadians(alpha, Trigonometric.Sine);
@@ -130,35 +139,24 @@ namespace LINAL
             if (reverse)
                 sin = -sin;
 
-            if (rotateOverPoint)
+            float[,] data =
             {
-                float[,] data = {
-                    {cos, 0, -sin, 0},
-                    {0, 1, 0, 0},
-                    {sin, 0, cos, 0},
-                    {0,0,0,1 }
-                };
-                rotationMatrix.SetData(data);
-            }
-            else
-            {
-                float[,] data = {
-                    {cos, 0, -sin},
-                    {0, 1, 0},
-                    {sin, 0, cos}
-                };
-                rotationMatrix.SetData(data);
-            }
+                {1, 0, 0, 0},
+                {0, cos, -sin, 0},
+                {0, sin, cos, 0},
+                {0,0,0,1 }
+            };
+
+            rotationMatrix.SetData(data);
 
             return rotationMatrix;
 
         }
 
-        public static Matrix Rotate3DZAxis(float alpha, bool reverse, bool rotateOverPoint)
+        public static Matrix Rotate3DYAxis(float alpha, bool reverse)
         {
 
-            int size = 3 + (rotateOverPoint ? 1 : 0);
-            Matrix rotationMatrix = new Matrix(size, size);
+            Matrix rotationMatrix = new Matrix(4, 4);
 
             float cos = GonioFactory.GetTrigonometricByRadians(alpha, Trigonometric.Cosine);
             float sin = GonioFactory.GetTrigonometricByRadians(alpha, Trigonometric.Sine);
@@ -166,27 +164,38 @@ namespace LINAL
             if (reverse)
                 sin = -sin;
 
-            if (rotateOverPoint)
-            {
-                float[,] data = {
+            float[,] data = {
+                { cos, 0, -sin, 0},
+                {0, 1, 0, 0},
+                {sin, 0, cos, 0},
+                {0,0,0,1 }
+            };
+
+            rotationMatrix.SetData(data);
+
+            return rotationMatrix;
+
+        }
+
+        public static Matrix Rotate3DZAxis(float alpha, bool reverse)
+        {
+
+            Matrix rotationMatrix = new Matrix(4, 4);
+
+            float cos = GonioFactory.GetTrigonometricByRadians(alpha, Trigonometric.Cosine);
+            float sin = GonioFactory.GetTrigonometricByRadians(alpha, Trigonometric.Sine);
+
+            if (reverse)
+                sin = -sin;
+
+            float[,] data = {
                 {cos, -sin, 0, 0},
                 {sin, cos, 0, 0},
                 {0, 0, 1, 0},
                 {0,0,0,1 }
-                };
+            };
 
-                rotationMatrix.SetData(data);
-            }
-            else
-            {
-                float[,] data = {
-                {cos, -sin, 0},
-                {sin, cos, 0},
-                {0, 0, 1}
-                };
-
-                rotationMatrix.SetData(data);
-            }
+            rotationMatrix.SetData(data);
 
             return rotationMatrix;
 
