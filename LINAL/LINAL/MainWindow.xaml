@@ -7,7 +7,10 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="600" Width="800"
         KeyDown="MainWindow_OnKeyDown">
-    <Canvas Name="MyCanvas">
-
-    </Canvas>
+    <Border>
+        <Canvas Name="MyCanvas" HorizontalAlignment="Center" VerticalAlignment="Center"
+          Width="0" Height="0"
+          RenderTransform="1 0 0 -1 0 0">
+        </Canvas>
+    </Border>
 </Window>

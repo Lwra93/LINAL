@@ -84,6 +84,27 @@ namespace LINAL
 
         }
 
+        public float GetScreenSize()
+        {
+
+            var tan = GonioFactory.GetTrigonometricByDegrees(_fieldOfView/2, Trigonometric.Tangent);
+            var halfSize = tan*_far;
+            return halfSize*2;
+
+        }
+
+        public void Move(bool closer)
+        {
+
+            if (closer)
+                _far--;
+            else
+            {
+                _far++;
+            }
+
+        }
+
 
     }
 }

@@ -152,7 +152,8 @@ namespace LINAL
             }
                 
 
-            Multiply(translation);
+            translation.Multiply(this);
+            _data = translation.GetData();
 
             if(addedHelpRow)
                 RemoveHelpRow();
@@ -203,55 +204,63 @@ namespace LINAL
             else
             {
 
-                if(p != null)
-                    Translate(new Point(-p.GetX(), -p.GetY(), -p.GetZ()));
+                Translate(new Point(-p.GetX(), -p.GetY(), -p.GetZ()));
 
                 for (int column = 0; column < GetColumns(); column++)
                 {
-                    float x = _data[0, column];
-                    float y = _data[1, column];
-                    float z = _data[2, column];
+                    
+                    Point p1 = new Point(_data[0, column], _data[1, column], _data[2, column]);
+                    Point p2 = new Point(_data[0, column+1], _data[1, column+1], _data[2, column+1]);
+                    Vector v = new Vector(p1, p2);
 
-                    Matrix sub = new Matrix(3,1);
-                    float[,] data = {{x}, {y}, {z}};
-                    sub.SetData(data);
+                    RotateReplacement(column, v, angle, p);
+                    RotateReplacement(column+1, v, angle, p);
 
-                    float t1 = GonioFactory.GetArcTrigonometricByRadians(z, x, Trigonometric.Tangent2);
-                    var yRotation = MatrixFactory.Rotate3DYAxis(t1, true);
-                    yRotation.Multiply(sub);
-
-                    sub = yRotation;
-
-                    float newX = (float)Math.Sqrt(x*x + z*z);
-                    float t2 = GonioFactory.GetArcTrigonometricByRadians(y, newX, Trigonometric.Tangent2);
-                    var zRotation = MatrixFactory.Rotate3DZAxis(t2, true);
-                    zRotation.Multiply(sub);
-                    sub = zRotation;
-
-                    Matrix rotate = MatrixFactory.Rotate3DXAxis(angle, false);
-
-                    rotate.Multiply(sub);
-                    sub = rotate;
-
-                    var reverseZRotation = MatrixFactory.Rotate3DZAxis(t2, false);
-                    reverseZRotation.Multiply(sub);
-                    sub = reverseZRotation;
-
-                    var reverseYRotation = MatrixFactory.Rotate3DYAxis(t1, false);
-                    reverseYRotation.Multiply(sub);
-                    sub = reverseYRotation;
-
-                    _data[0, column] = sub.Get(0, column);
-                    _data[1, column] = sub.Get(1, column);
-                    _data[2, column] = sub.Get(2, column);
-
+                    column++;
                 }
 
-                if(p != null)
-                    Translate(p);
-
+                Translate(p);
             }
 
+        }
+
+        public void RotateReplacement(int column, Vector v, float alpha, Point p)
+        {
+
+            float x = _data[0, column];
+            float y = _data[1, column];
+            float z = _data[2, column];
+
+            Matrix sub = new Matrix(4, 1);
+            float[,] data = { { x }, { y }, { z }, {1} };
+            sub.SetData(data);
+
+            float t1 = GonioFactory.GetArcTrigonometricByRadians(v.GetZ(), v.GetX(), Trigonometric.Tangent2);
+            var yRotation = MatrixFactory.Rotate3DYAxis(t1, true, p != null);
+            yRotation.Multiply(sub);
+            sub = yRotation;
+
+            float newX = (float)Math.Sqrt(v.GetX() * v.GetX() + v.GetZ() * v.GetZ());
+            float t2 = GonioFactory.GetArcTrigonometricByRadians(v.GetY(), newX, Trigonometric.Tangent2);
+            var zRotation = MatrixFactory.Rotate3DZAxis(t2, true, p != null);
+            zRotation.Multiply(sub);
+            sub = zRotation;
+
+            Matrix rotate = MatrixFactory.Rotate3DXAxis(GonioFactory.DegreesToRadians(alpha), false, p != null);
+            rotate.Multiply(sub);
+            sub = rotate;
+
+            var reverseZRotation = MatrixFactory.Rotate3DZAxis(t2, false, p != null);
+            reverseZRotation.Multiply(sub);
+            sub = reverseZRotation;
+
+            var reverseYRotation = MatrixFactory.Rotate3DYAxis(t1, false, p != null);
+            reverseYRotation.Multiply(sub);
+            sub = reverseYRotation;
+
+            _data[0, column] = sub.Get(0, 0);
+            _data[1, column] = sub.Get(1, 0);
+            _data[2, column] = sub.Get(2, 0);
         }
 
         public int GetHighestInRow(int column)
@@ -439,13 +448,11 @@ namespace LINAL
                             num += Get(firstRows, firstColumns) * matrix.Get(firstColumns, secondColumns);
 
                         result.Add(firstRows, secondColumns, num);
-                        
 
                     }
 
                 }
             }
-
 
             _data = result.GetData();
 
@@ -502,6 +509,69 @@ namespace LINAL
                 column++;
 
             }
+
+        }
+
+        public Point GetMiddle()
+        {
+
+            List<Point> points = new List<Point>();
+
+            for (int column = 0; column < GetColumns(); column++)
+            {
+
+                float x = _data[0, column];
+                float y = _data[1, column];
+                float z = _data[2, column];
+
+                bool existsInList = false;
+
+                foreach (Point p in points)
+                {
+                    if (p.GetX() == x && p.GetY() == y && p.GetZ() == z)
+                    {
+                        existsInList = true;
+                        break;
+                    }                    
+                }
+
+                if(!existsInList)
+                    points.Add(new Point(x,y,z));
+
+            }
+
+            float x1 = float.MinValue;
+            float x2 = float.MaxValue;
+            float y1 = float.MinValue;
+            float y2 = float.MaxValue;
+            float z1 = float.MinValue;
+            float z2 = float.MaxValue;
+
+            foreach (Point p in points)
+            {
+
+                if (p.GetX() > x1)
+                    x1 = p.GetX();
+                else if (p.GetX() < x2)
+                    x2 = p.GetX();
+
+                if (p.GetY() > y1)
+                    y1 = p.GetY();
+                else if (p.GetY() < y2)
+                    y2 = p.GetY();
+
+                if (p.GetZ() > z1)
+                    z1 = p.GetZ();
+                else if (p.GetZ() < z2)
+                    z2 = p.GetZ();
+
+            }
+
+            float newX = x1 + ((x2 - x1)/2);
+            float newY = y1 + ((y2 - y1) / 2);
+            float newZ = z1 + ((z2 - z1) / 2);
+
+            return new Point(newX, newY, newZ);
 
         }
 

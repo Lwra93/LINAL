@@ -20,7 +20,7 @@ namespace LINAL
         public Camera()
         {
             
-            Point eyePoint = new Point(45, 45, -30);
+            Point eyePoint = new Point(45, 45, 0);
             Point lookAtPoint = new Point(45, 45,-45);
             Point upPoint = new Point(0,1,0);
 
@@ -101,6 +101,13 @@ namespace LINAL
 
             return cameraMatrix;
 
+
+        }
+
+        public Point GetEyePoint()
+        {
+            
+            return new Point(_eye.GetX(), _eye.GetY(), _eye.GetZ());
 
         }
 

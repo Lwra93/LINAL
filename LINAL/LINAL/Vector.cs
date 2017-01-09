@@ -178,6 +178,18 @@ namespace LINAL
             this.help = 0;
         }
 
+        public void Move(float speed, Vector Direction)
+        {
+
+            Direction.Enlarge(speed);
+            
+            GetPoint(0).SetX(GetPoint(0).GetX() + Direction.GetX());
+            GetPoint(1).SetX(GetPoint(1).GetX() + Direction.GetX());
+            GetPoint(0).SetY(GetPoint(0).GetY() + Direction.GetY());
+            GetPoint(1).SetY(GetPoint(1).GetY() + Direction.GetY());
+
+        }
+
         public void Print()
         {
             Console.WriteLine("Vector x: " + GetX() + ", y:" + GetY() + ", z: " + GetZ() + ", Length: " + GetLength());

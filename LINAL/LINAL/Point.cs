@@ -58,7 +58,7 @@ namespace LINAL
 
         public bool Is3D()
         {
-            return z > 0;
+            return z != 0;
         }
 
         public Vector MakeVector()
