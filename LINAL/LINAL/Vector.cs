@@ -50,11 +50,17 @@ namespace LINAL
             this.help = help;
         }
 
+        /*
+         * Returns the length of the vector
+         */
         public float GetLength()
         {
             return (float) Math.Sqrt(GetX()*GetX() + GetY()*GetY() + GetZ()*GetZ());
         }
 
+        /*
+         * Checks if this vector is dependant of the other vector
+         */
         public bool IsDependantOf(Vector v)
         {
 
@@ -66,6 +72,9 @@ namespace LINAL
 
         }
 
+        /*
+         * Adds a vector to this one
+         */
         public Vector Add(Vector v)
         {
 
@@ -79,6 +88,9 @@ namespace LINAL
 
         }
 
+        /*
+         * Subtracts a vector from this one
+         */
         public Vector Subtract(Vector v)
         {
             float x = GetX() - v.GetX();
@@ -90,6 +102,9 @@ namespace LINAL
             return new Vector(GetPoint(0), p);
         }
 
+        /*
+         * Transforms vector to a unit vector
+         */
         public void MakeUnitVector()
         {
             float length = GetLength();
@@ -104,6 +119,9 @@ namespace LINAL
 
         }
 
+        /*
+         * Enlarges the vector
+         */
         public void Enlarge(float factor)
         {
 
@@ -117,6 +135,9 @@ namespace LINAL
 
         }
 
+        /*
+         * Simplifies vectors
+         */
         public Vector GetSimplified()
         {
 
@@ -145,6 +166,9 @@ namespace LINAL
 
         }
 
+        /*
+         * Calculates crossproduct of vectors
+         */
         public Vector GetCrossProduct(Vector v)
         {
 
@@ -162,22 +186,17 @@ namespace LINAL
 
         }
 
+        /*
+         * Calculates inproduct of vectors
+         */
         public float GetInproduct(Vector v)
         {
-            //ax*bx + ay*by + az*bz
             return GetX() * v.GetX() + GetY() * v.GetY() + GetZ() * v.GetZ();
         }
 
-        public void AddHelp()
-        {
-            this.help = 1;
-        }
-
-        public void RemoveHelp()
-        {
-            this.help = 0;
-        }
-
+        /*
+         * Moves the vector based on the directional vector
+         */
         public void Move(float speed, Vector Direction)
         {
 
@@ -190,6 +209,9 @@ namespace LINAL
 
         }
 
+        /*
+         * Prints the vector
+         */
         public void Print()
         {
             Console.WriteLine("Vector x: " + GetX() + ", y:" + GetY() + ", z: " + GetZ() + ", Length: " + GetLength());

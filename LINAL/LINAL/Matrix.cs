@@ -14,31 +14,49 @@ namespace LINAL
 
         private float[,] _data;
 
+        /*
+         * Creates a new matrix
+         */
         public Matrix(int rows, int columns)
         {
             _data = new float[rows,columns];
         }
 
+        /*
+         * Gets the amount of rows of the matrix
+         */
         public int GetRows()
         {
             return _data.GetLength(0);
         }
 
+        /*
+         * Gets the amount of columns of the matrix
+         */
         public int GetColumns()
         {
             return _data.GetLength(1);
         }
 
+        /*
+         * Gets the entire dataset of the matrix
+         */
         public float[,] GetData()
         {
             return _data;
         }
 
+        /*
+         * Sets the entire dataset of the matrix
+         */
         public void SetData(float[,] data)
         {
             _data = data;
         }
 
+        /*
+         * Gets on particular number in the datamatrix, based on the row and the column
+         */
         public float Get(int row, int column)
         {
             if (row >= 0 && row < _data.GetLength(0) && column >= 0 && column < _data.GetLength(1))
@@ -47,12 +65,18 @@ namespace LINAL
             return 0;
         }
 
-        public void Add(int row, int column, float number)
+        /*
+         * Sets the data of one particular place in the dataset
+         */
+        public void Set(int row, int column, float number)
         {
             if (row >= 0 && row < _data.GetLength(0) && column >= 0 && column < _data.GetLength(1))
                 _data[row, column] = number;
         }
 
+        /*
+         * Adds the data of a vector to the dataset
+         */
         public void AddVector(int column, Vector v)
         {
 
@@ -81,12 +105,18 @@ namespace LINAL
 
         }
 
+        /*
+         * Removes a number from the dataset, based on row and column
+         */
         public void Remove(int row, int column)
         {
             if (row >= 0 && row < _data.GetLength(0) && column >= 0 && column < _data.GetLength(1))
                 _data[row, column] = 0;
         }
 
+        /*
+         * Sets the size of the dataset, keeping the data in the dataset if possible
+         */
         public void SetSizeWithData(int rows, int columns)
         {
 
@@ -107,11 +137,17 @@ namespace LINAL
 
         }
 
+        /*
+         * Sets the size of the dataset, completely removing the previous data
+         */
         public void SetSizeWithoutData(int rows, int columns)
         {
             _data = new float[rows,columns];
         }
 
+        /*
+         * Resets all values and makes identity matrix
+         */
         public void MakeIdentityMatrix()
         {
 
@@ -126,6 +162,9 @@ namespace LINAL
 
         }
 
+        /*
+         * Resets all values and makes null matrix
+         */
         public void MakeNullMatrix()
         {
             for (int row = 0; row < _data.GetLength(0); row++)
@@ -139,11 +178,14 @@ namespace LINAL
             }
         }
 
-        public void Translate(Point translateOver)
+        /*
+         * Translates current dataset over x, y , z. Also checks if translation is three dimensional
+         */
+        public void Translate(float x, float y, float z = 0, bool threedim = false)
         {
 
             bool addedHelpRow = false;
-            Matrix translation = MatrixFactory.GetTranslationMatrix(translateOver);
+            Matrix translation = MatrixFactory.GetTranslationMatrix(x, y, z, threedim);
 
             if (translation.GetColumns() != GetRows())
             {
@@ -151,99 +193,183 @@ namespace LINAL
                 addedHelpRow = true;
             }
                 
-
             translation.Multiply(this);
             _data = translation.GetData();
 
             if(addedHelpRow)
                 RemoveHelpRow();
-            
 
         }
 
-        public void Scale(float x, float y, float z = 0)
+        /*
+         * Scales current dataset over x, y, z. Also checks if the dataset contains points instead of vectors
+         */
+        public void Scale(float x, float y, float z = 0, bool points = true)
         {
 
             Matrix scaling = MatrixFactory.GetScalingMatrix(this, x, y, z);
+
+            if (points)
+                ScalePoints(scaling);
+            else
+                ScaleVectors(scaling);
+                
+        }
+
+        /*
+         * Scales points of vectors
+         */
+        public void ScalePoints(Matrix scaling)
+        {
+
+            Dictionary<string, List<int>> linkedPoints = new Dictionary<string, List<int>>();
+
+            for (int column = 0; column < GetColumns(); column++)
+            {
+                string point = _data[0, column] + ":" + _data[1, column] + ":" + _data[2, column];
+                if (!linkedPoints.ContainsKey(point))
+                    linkedPoints.Add(point, new List<int>());
+
+                linkedPoints[point].Add(column);
+
+            }
+
+            Dictionary<int, Point> modifiedPoints = new Dictionary<int, Point>();
+
+            Matrix a = ConvertToVectors();
+            scaling.Multiply(a);
+
+            int vector = 0;
+
+            for (int column = 0; column < GetColumns(); column += 2, vector++)
+            {
+
+                float difX = scaling.Get(0, vector) - a.Get(0, vector);
+                float difY = scaling.Get(1, vector) - a.Get(1, vector);
+                float difZ = scaling.Get(2, vector) - a.Get(2, vector);
+
+                float x1 = _data[0, column];
+                float y1 = _data[1, column];
+                float z1 = _data[2, column];
+
+                float x2 = _data[0, column + 1];
+                float y2 = _data[1, column + 1];
+                float z2 = _data[2, column + 1];
+
+                modifiedPoints.Add(column, new Point(x1 - (difX / 2), y1 - (difY / 2), z1 - (difZ / 2)));
+                modifiedPoints.Add(column + 1, new Point(x2 + (difX / 2), y2 + (difY / 2), z2 + (difZ / 2)));
+
+            }
+
+            foreach (string key in linkedPoints.Keys)
+            {
+
+                string[] str = key.Split(':');
+                Point original = new Point(float.Parse(str[0]), float.Parse(str[1]), float.Parse(str[2]));
+
+                float deltaX = 0;
+                float deltaY = 0;
+                float deltaZ = 0;
+
+                foreach (int column in linkedPoints[key])
+                {
+
+                    if (!modifiedPoints.ContainsKey(column))
+                        continue;
+
+                    Point p = modifiedPoints[column];
+
+                    deltaX += (p.GetX() - original.GetX());
+                    deltaY += (p.GetY() - original.GetY());
+                    deltaZ += (p.GetZ() - original.GetZ());
+                }
+
+                Point newPoint = new Point(original.GetX() + deltaX, original.GetY() + deltaY, original.GetZ() + deltaZ);
+
+                foreach (int column in linkedPoints[key])
+                {
+
+                    _data[0, column] = newPoint.GetX();
+                    _data[1, column] = newPoint.GetY();
+                    _data[2, column] = newPoint.GetZ();
+
+                }
+
+            }
+
+        }
+
+        /*
+         * Scales just vectors
+         */
+        public void ScaleVectors(Matrix scaling)
+        {
             scaling.Multiply(this);
             _data = scaling.GetData();
         }
 
-        public void Rotate3D(float angle, Point p1, Point p2 = null)
-        {
-            Rotate(angle, true, p1, p2);
-        }
-
-        public void Rotate2D(float angle, Point p1, Point p2 = null)
-        {
-            Rotate(angle, false, p1, p2);
-        }
-
+        /*
+         * Used to rotate the dataset
+         */
         public void Rotate(float angle, bool threedim, Point p1, Point p2 = null)
         {
 
-            if (!threedim)
+            if(threedim)
+                Rotate3D(angle, p1, p2);
+            else
+                Rotate2D(angle, p1);
+
+        }
+
+        /*
+         * Rotate a 3D matrix a vector going through the origin, or not
+         */
+        public void Rotate3D(float angle, Point p1, Point p2 = null)
+        {
+            Vector v = null;
+            Point over = null;
+
+            if (p2 == null)
+                v = new Vector(new Point(0, 0, 0), p1);
+            else
             {
-                //Rotate around offspring
-                if (p1 == null)
-                {
-                    Matrix rotation = MatrixFactory.Rotate2D(angle);
-                    Multiply(rotation);
-                }
-                else
-                {
 
-                    Point inverse = new Point(-p1.GetX(), -p1.GetY(), -p1.GetZ());
-                    Translate(inverse);
-                    Matrix rotation = MatrixFactory.Rotate2D(angle);
-                    Multiply(rotation);
-                    Translate(p1);
+                v = new Vector(p1, p2);
+                over = p1;
+            }
 
-                }
+            Matrix rotation = MatrixFactory.Get3DRotationMatrix(angle, v, over);
+
+            rotation.Multiply(this);
+            _data = rotation.GetData();
+        }
+
+        /*
+         * Rotates the dataset over a point, or the origin
+         */
+        public void Rotate2D(float angle, Point p = null)
+        {
+            if (p == null)
+            {
+                Matrix rotation = MatrixFactory.Rotate2D(angle);
+                Multiply(rotation);
             }
             else
             {
 
-                Vector v = null;
-                Point over = null;
-
-                if (p2 == null)
-                    v = new Vector(new Point(0, 0, 0), p1);
-                else
-                {
-
-                    v = new Vector(p1, p2);
-                    over = p1;
-                }
-
-                Matrix rotation = MatrixFactory.Get3DRotationMatrix(angle, v, over);
-
-                rotation.Multiply(this);
-                _data = rotation.GetData();
+                Point inverse = new Point(-p.GetX(), -p.GetY(), -p.GetZ());
+                Translate(-p.GetX(), -p.GetY(), -p.GetZ(), false);
+                Matrix rotation = MatrixFactory.Rotate2D(angle);
+                Multiply(rotation);
+                Translate(p.GetX(), p.GetY(), p.GetZ(), false);
 
             }
-
         }
 
-        public void RotateReplacement(int column, Vector v, float alpha, Point p)
-        {
-
-            float x = _data[0, column];
-            float y = _data[1, column];
-            float z = _data[2, column];
-
-            Matrix sub = new Matrix(4, 1);
-            float[,] data = { { x }, { y }, { z } };
-            sub.SetData(data);
-
-            
-
-            _data[0, column] = sub.Get(0, 0);
-            _data[1, column] = sub.Get(1, 0);
-            _data[2, column] = sub.Get(2, 0);
-        }
-
-        public int GetHighestInRow(int column)
+        /*
+         * Gets the highest number in the sequence in the matrix. Used for inversion
+         */
+        public int GetColumnOfHighestInRow(int column)
         {
 
             int num = 0;
@@ -257,6 +383,9 @@ namespace LINAL
 
         }
 
+        /*
+         * Adds a help row to sustain conventions
+         */
         public void AddHelpRow()
         {
             
@@ -267,11 +396,17 @@ namespace LINAL
 
         }
 
+        /*
+         * Removes the help row that sustains conventions
+         */
         public void RemoveHelpRow()
         {
             SetSizeWithData(GetRows() - 1, GetColumns());
         }
 
+        /*
+         * Switches rowdata in the matrix
+         */
         public void SwitchValues(int row1, int row2)
         {
 
@@ -286,6 +421,9 @@ namespace LINAL
 
         }
 
+        /*
+         * Prints the matrix
+         */
         public void Print()
         {
             for (int row = 0; row < _data.GetLength(0); row++)
@@ -301,6 +439,9 @@ namespace LINAL
             }
         }
 
+        /*
+         * Inverts the matrix. Cannot be used with points, only vectors
+         */
         public void Invert()
         {
 
@@ -312,7 +453,7 @@ namespace LINAL
 
             if (_data[0, 0] == 0f)
             {
-                int row = GetHighestInRow(0);
+                int row = GetColumnOfHighestInRow(0);
                 SwitchValues(0,row);
                 inversion.SwitchValues(0,row);
             }
@@ -354,8 +495,9 @@ namespace LINAL
 
         }
 
-
-
+        /*
+         * Modifies the values in the row
+         */
         public void ModifyRow(float value, Operator op, int row, int column = -1)
         {
 
@@ -389,7 +531,10 @@ namespace LINAL
 
 
         }
-
+         
+        /*
+         * Determines the determinant of the matrix
+         */
         public float GetDeterminant()
         {
             //2D
@@ -406,6 +551,9 @@ namespace LINAL
             }
         }
 
+        /*
+         * Dot-product. Multiplies the matrix with another
+         */
         public void Multiply(Matrix matrix)
         {
 
@@ -427,7 +575,7 @@ namespace LINAL
                         for (int firstColumns = 0; firstColumns < GetColumns(); firstColumns++)
                             num += Get(firstRows, firstColumns) * matrix.Get(firstColumns, secondColumns);
 
-                        result.Add(firstRows, secondColumns, num);
+                        result.Set(firstRows, secondColumns, num);
 
                     }
 
@@ -438,26 +586,27 @@ namespace LINAL
 
         }
 
+        /*
+         * Convert points to vectors
+         */
         public Matrix ConvertToVectors()
         {
 
             Matrix m = new Matrix(GetRows(), GetColumns()/2);
             float[,] data = new float[GetRows(),GetColumns()/2];
+            int newColumn = 0;
 
-
-            for (int column = 0; column < GetColumns()/2; column++)
+            for (int column = 0; column < GetColumns(); column+=2, newColumn++)
             {
 
                 float x = _data[0, column + 1] - _data[0, column];
                 float y = _data[1, column + 1] - _data[1, column];
                 float z = _data[2, column + 1] - _data[2, column];
 
-                data[0, column] = x;
-                data[1, column] = y;
-                data[2, column] = z;
-                data[3, column] = 1;
-
-                column++;
+                data[0, newColumn] = x;
+                data[1, newColumn] = y;
+                data[2, newColumn] = z;
+                data[3, newColumn] = 1;
 
             }
 
@@ -466,32 +615,9 @@ namespace LINAL
             return m;
         }
 
-        public void Recalculate(double screenSize)
-        {
-
-            for (int column = 0; column < _data.GetLength(1); column++)
-            {
-
-                float x = _data[0, column + 1] - _data[0, column];
-                float y = _data[1, column + 1] - _data[1, column];
-                float z = _data[2, column + 1] - _data[2, column];
-                float w = _data[3, column + 1] - _data[3, column];
-
-                x = (float) ((screenSize / 2) + ((x + 1) / w) * screenSize * 0.5);
-                y = (float)((screenSize / 2) + ((y + 1) / w) * screenSize * 0.5);
-                z = -z;
-
-                _data[0, column + 1] = x;
-                _data[1, column + 1] = y;
-                _data[2, column + 1] = z;
-                _data[3, column + 1] = w;
-
-                column++;
-
-            }
-
-        }
-
+        /*
+         * Gets the middle point of a matrix
+         */
         public Point GetMiddle()
         {
 
@@ -552,6 +678,54 @@ namespace LINAL
             float newZ = z1 + ((z2 - z1) / 2);
 
             return new Point(newX, newY, newZ);
+
+        }
+
+        /*
+         * Get the middle of the furthest and nearest X coordinate
+         */
+        public float GetWidth()
+        {
+
+            List<Point> points = new List<Point>();
+
+            for (int column = 0; column < GetColumns(); column++)
+            {
+
+                float x = _data[0, column];
+                float y = _data[1, column];
+                float z = _data[2, column];
+
+                bool existsInList = false;
+
+                foreach (Point p in points)
+                {
+                    if (p.GetX() == x && p.GetY() == y && p.GetZ() == z)
+                    {
+                        existsInList = true;
+                        break;
+                    }
+                }
+
+                if (!existsInList)
+                    points.Add(new Point(x, y, z));
+
+            }
+
+            float x1 = float.MinValue;
+            float x2 = float.MaxValue;
+
+            foreach (Point p in points)
+            {
+
+                if (p.GetX() > x1)
+                    x1 = p.GetX();
+                else if (p.GetX() < x2)
+                    x2 = p.GetX();
+
+            }
+
+            return x2 - x1;
 
         }
 

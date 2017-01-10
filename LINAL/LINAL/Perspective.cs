@@ -12,6 +12,9 @@ namespace LINAL
 
         private float _near, _far, _fieldOfView;
 
+        /*
+         * Creates a new pespective
+         */
         public Perspective(float near, float far)
         {
 
@@ -21,42 +24,66 @@ namespace LINAL
 
         }
 
+        /*
+         * Sets the field of view
+         */
         public void SetFieldOfView(float fieldOfView)
         {
             this._fieldOfView = fieldOfView;
         }
 
+        /*
+         * Returns the field of view
+         */
         public float GetFieldOfView()
         {
             return this._fieldOfView;
         }
 
+        /*
+         * Sets the far value
+         */
         public void SetFar(float far)
         {
             this._far = far;
         }
 
+        /*
+         * Returns the far value
+         */
         public float GetFar()
         {
             return this._far;
         }
 
+        /*
+         * Sets the near value
+         */
         public void SetNear(float near)
         {
             this._near = near;
         }
 
+        /*
+         * Returns the near value
+         */
         public float GetNear()
         {
             return this._near;
         }
 
+        /*
+         * Calculates the scale based on the fieldofview and the near variable
+         */
         public float GetScale()
         {
             var rad = GonioFactory.DegreesToRadians(_fieldOfView);
             return (_near*GonioFactory.GetTrigonometricByRadians(rad*0.5f, Trigonometric.Tangent));
         }
 
+        /*
+         * Returns the Pespective matrix
+         */
         public Matrix Get()
         {
             
@@ -84,6 +111,10 @@ namespace LINAL
 
         }
 
+        /*
+         * Calculates the pespective screensize
+         */
+
         public float GetScreenSize()
         {
 
@@ -92,19 +123,6 @@ namespace LINAL
             return halfSize*2;
 
         }
-
-        public void Move(bool closer)
-        {
-
-            if (closer)
-                _far--;
-            else
-            {
-                _far++;
-            }
-
-        }
-
 
     }
 }

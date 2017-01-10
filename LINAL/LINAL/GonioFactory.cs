@@ -9,12 +9,18 @@ namespace LINAL
     class GonioFactory
     {
 
+        /*
+         * Returns the Arctrigonometric of a function, based on degrees
+         */
         public static float GetArcTrigonometricByDegrees(float value1, float value2, Trigonometric tri)
         {
             float radians = GetArcTrigonometricByRadians(value1, value2, tri);
             return RadiansToDegrees(radians);
         }
 
+        /*
+         * Returns the Arctrigonometric of a function, based on radians
+         */
         public static float GetArcTrigonometricByRadians(float value1, float value2, Trigonometric tri)
         {
             double result = value1 / value2;
@@ -31,16 +37,25 @@ namespace LINAL
                 return (float) Trigonometric.Undefined;
         }
 
+        /*
+         * Converts degrees to radians
+         */
         public static float DegreesToRadians(float degrees)
         {
             return (float)(degrees*(Math.PI/180.0));
         }
 
+        /*
+         * Converts radians to degrees
+         */
         public static float RadiansToDegrees(float radians)
         {
             return (float)(radians / Math.PI * 180);
         }
 
+        /*
+         * Returns the trigonometric of a function, based on radians
+         */
         public static float GetTrigonometricByRadians(float radians, Trigonometric tri)
         {
             if (tri == Trigonometric.Sine)
@@ -53,6 +68,9 @@ namespace LINAL
                 return (float)Trigonometric.Undefined;
         }
 
+        /*
+         * Returns the trigonometric of a function, based on degrees
+         */
         public static float GetTrigonometricByDegrees(float degrees, Trigonometric tri)
         {
 
@@ -63,6 +81,9 @@ namespace LINAL
 
     }
 
+    /*
+     * Enumeration for trigonometric functions
+     */
     public enum Trigonometric
     {
         Undefined = 0,

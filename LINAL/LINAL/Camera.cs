@@ -17,54 +17,50 @@ namespace LINAL
 
         private Vector _x, _y, _z;
 
+        /*
+         * Initializes the camera and creates the vectors for the first time
+         */
         public Camera()
         {
-            
-            Point eyePoint = new Point(0, 5, 3);
-            Point lookAtPoint = new Point(0, 0, -100);
-            Point upPoint = new Point(0,1,0);
-
-            this._eye = eyePoint.MakeVector();
-            _eye.SetHelp(1);
-            this._lookAt = lookAtPoint.MakeVector();
-            _lookAt.SetHelp(1);
-            this._up = upPoint.MakeVector();
-            _up.SetHelp(1);
+           
+            SetEye(0, 200, 200);
+            SetLookAtPoint(0, 0, 0);
+            SetUp(0, 1, 0);
 
             SetVectors();
 
         }
 
-        public void turn(float alpha)
+        /*
+         * Initializes the Eye position
+         */
+        public void SetEye(float x, float y, float z)
         {
-            
-            Matrix m = new Matrix(4, 1);
-            float[,] data1 =
-            {
-                {
-                    _lookAt.GetX()
-                },
-                {
-                    _lookAt.GetY()
-                },
-                {
-                    _lookAt.GetZ()
-                },
-                {
-                    1
-                }
-            };
-
-            m.SetData(data1);
-
-            m.Rotate3D(alpha, new Point(_eye.GetX(), _eye.GetY(), _eye.GetZ()));
-
-            Point p = new Point(m.Get(0, 0), m.Get(1, 0), m.Get(2, 0));
-            this._lookAt = p.MakeVector();
-            SetVectors();
-
+            _eye = (new Point(x, y, z)).MakeVector();
+            _eye.SetHelp(1);
         }
 
+        /*
+         * Initializes the LookAt position
+         */
+        public void SetLookAtPoint(float x, float y, float z)
+        {
+            _lookAt = (new Point(x, y, z)).MakeVector();
+            _lookAt.SetHelp(1);
+        }
+
+        /*
+         * Initializes the Up position
+         */ 
+        public void SetUp(float x, float y, float z)
+        {
+            _up = (new Point(x, y, z)).MakeVector();
+            _up.SetHelp(1);
+        }
+
+        /*
+         * Rebuilds the camera vectors 
+         */
         public void SetVectors()
         {
             _z = _eye.Subtract(_lookAt);
@@ -77,6 +73,9 @@ namespace LINAL
             _z.MakeUnitVector();
         }
 
+        /*
+         * Returns the camera as a matrix. Uses all updated values
+         */
         public Matrix Get()
         {
 
@@ -103,15 +102,6 @@ namespace LINAL
 
 
         }
-
-        public Point GetEyePoint()
-        {
-            
-            return new Point(_eye.GetX(), _eye.GetY(), _eye.GetZ());
-
-        }
-
-
 
     }
 }

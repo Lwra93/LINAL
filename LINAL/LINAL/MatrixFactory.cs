@@ -10,57 +10,54 @@ namespace LINAL
     class MatrixFactory
     {
 
-        
 
-        public static Matrix GetScaleAndTranslate(Matrix scaling, Matrix translate)
-        {
-
-            for (int i = 0; i < scaling.GetRows(); i++)
-                translate.Add(i, i, scaling.Get(i, i));
-
-            return translate;
-
-
-        }
-
+        /*
+         * Returns a scaling matrix, two and three dimensional
+         */
         public static Matrix GetScalingMatrix(Matrix m, float x, float y, float z= 0)
         {
 
             Matrix scalingMatrix = new Matrix(m.GetRows(), m.GetRows());
-            scalingMatrix.Add(0, 0, x);
-            scalingMatrix.Add(1, 1, y);
+            scalingMatrix.Set(0, 0, x);
+            scalingMatrix.Set(1, 1, y);
 
             if (z != 0)
-                scalingMatrix.Add(2, 2, z);
+                scalingMatrix.Set(2, 2, z);
 
             return scalingMatrix;
 
         }
 
-        public static Matrix GetTranslationMatrix(Point p)
+        /*
+         * Returns a translation matrix, two and three dimensional
+         */
+        public static Matrix GetTranslationMatrix(float x, float y, float z = 0, bool threedim = false)
         {
 
             Matrix translationMatrix = null;
-            if (p.Is3D())
+            if (threedim)
             {
                 translationMatrix = new Matrix(4, 4);
                 translationMatrix.MakeIdentityMatrix();
-                translationMatrix.Add(0, 3, p.GetX());
-                translationMatrix.Add(1, 3, p.GetY());
-                translationMatrix.Add(2, 3, p.GetZ());
+                translationMatrix.Set(0, 3, x);
+                translationMatrix.Set(1, 3, y);
+                translationMatrix.Set(2, 3, z);
             }
             else
             {
                 translationMatrix = new Matrix(3, 3);
                 translationMatrix.MakeIdentityMatrix();
-                translationMatrix.Add(0, 2, p.GetX());
-                translationMatrix.Add(1, 2, p.GetY());
+                translationMatrix.Set(0, 2, x);
+                translationMatrix.Set(1, 2, y);
             }
 
             return translationMatrix;
 
         }
 
+        /*
+         * Returns a 2D rotation matrix.
+         */
         public static Matrix Rotate2D(float alpha)
         {
 
@@ -80,6 +77,9 @@ namespace LINAL
 
         }
 
+        /*
+         * Returns a 3D rotation matrix, over a vector, or a vector through the origin
+         */
         public static Matrix Get3DRotationMatrix(float alpha, Vector rotationVector, Point translateOver = null)
         {
 
@@ -89,7 +89,7 @@ namespace LINAL
             if (translateOver != null)
             {
                 Matrix translation =
-                    GetTranslationMatrix(new Point(-translateOver.GetX(), -translateOver.GetY(), -translateOver.GetZ()));
+                    GetTranslationMatrix(-translateOver.GetX(), -translateOver.GetY(), -translateOver.GetZ(), true);
                 translation.Multiply(rotationMatrix);
                 rotationMatrix = translation;
             }
@@ -119,7 +119,7 @@ namespace LINAL
 
             if (translateOver != null)
             {
-                Matrix translation = GetTranslationMatrix(translateOver);
+                Matrix translation = GetTranslationMatrix(translateOver.GetX(), translateOver.GetY(), translateOver.GetZ(), true);
                 translation.Multiply(rotationMatrix);
                 rotationMatrix = translation;
             }
@@ -128,6 +128,9 @@ namespace LINAL
 
         }
 
+        /*
+         * Returns a 3D matrix based on the X axis
+         */
         public static Matrix Rotate3DXAxis(float alpha, bool reverse)
         {
 
@@ -153,6 +156,9 @@ namespace LINAL
 
         }
 
+        /*
+         * Returns a 3D matrix based on the Y axis
+         */
         public static Matrix Rotate3DYAxis(float alpha, bool reverse)
         {
 
@@ -177,6 +183,9 @@ namespace LINAL
 
         }
 
+        /*
+         * Returns a 3D matrix based on the Z axis
+         */
         public static Matrix Rotate3DZAxis(float alpha, bool reverse)
         {
 
