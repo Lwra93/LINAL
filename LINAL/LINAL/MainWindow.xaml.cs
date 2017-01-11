@@ -51,7 +51,7 @@ namespace LINAL
             t.Tick += ScaleCube;
             t.Interval = new TimeSpan(0, 0, 0, 0, 400);
             t.Start();
-            
+
         }
 
         /*
